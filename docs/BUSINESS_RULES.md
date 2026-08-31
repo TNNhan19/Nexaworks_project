@@ -200,14 +200,16 @@ If a violation is detected, it is returned as an `ExplanationRecord` with the ap
 ### Status propagation rules (explicit)
 
 1. `OPERATIONALLY_INFEASIBLE` → `PLAN_INFEASIBLE` (hard failure dominates).
-2. Any scenario reaches `NEGATIVE_CASH` → at least `PLAN_AT_RISK`.
-3. Any scenario reaches `BUFFER_BREACH` → at least `PLAN_AT_RISK`.
-4. `OPERATIONALLY_AT_RISK` (mandatory infeasible or omitted) → `PLAN_AT_RISK`.
-5. `CASH_AT_RISK` (from Phase 2F overall status) → `PLAN_AT_RISK`.
-6. `OPERATIONALLY_PARTIAL` + `CASH_SAFE` → `PLAN_PARTIAL`.
-7. `OPERATIONALLY_FEASIBLE` + `CASH_SAFE` → `PLAN_FEASIBLE`.
+2. EXPECTED reaches `NEGATIVE_CASH` → `FinancialStatus.NEGATIVE_CASH` → at least `PLAN_AT_RISK`.
+3. EXPECTED reaches `BUFFER_BREACH` → `FinancialStatus.BUFFER_BREACH` → at least `PLAN_AT_RISK`.
+4. EXPECTED is safe but DOWNSIDE is unsafe → `FinancialStatus.CASH_AT_RISK` → at least `PLAN_AT_RISK`.
+5. `OPERATIONALLY_AT_RISK` (mandatory explicitly infeasible) → `PLAN_AT_RISK`.
+6. A silently omitted mandatory item → `OPERATIONALLY_INFEASIBLE` → `PLAN_INFEASIBLE`.
+7. `CASH_AT_RISK` → `PLAN_AT_RISK`.
+8. `OPERATIONALLY_PARTIAL` + `CASH_SAFE` → `PLAN_PARTIAL`.
+9. `OPERATIONALLY_FEASIBLE` + `CASH_SAFE` → `PLAN_FEASIBLE`.
 
-Financial severity order (worst wins): `NEGATIVE_CASH` > `BUFFER_BREACH` > `CASH_AT_RISK` > `CASH_SAFE`.
+SUCCESS remains supporting evidence and does not drive aggregate financial status.
 
 ### Explanation provenance
 

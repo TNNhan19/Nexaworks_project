@@ -27,19 +27,19 @@ Phase 2G uses three independent status dimensions rather than a single boolean.
 |---|---|
 | `OPERATIONALLY_FEASIBLE` | No hard violations; all mandatory items accounted for; no delays |
 | `OPERATIONALLY_PARTIAL` | Structurally valid; some optional items delayed or opportunities no-bid |
-| `OPERATIONALLY_AT_RISK` | One or more mandatory items could not be scheduled |
+| `OPERATIONALLY_AT_RISK` | One or more mandatory items were explicitly reported infeasible |
 | `OPERATIONALLY_INFEASIBLE` | Hard constraint violation detected during Phase 2G recheck |
 
 ### `FinancialStatus`
 
 | Value | Meaning |
 |---|---|
-| `CASH_SAFE` | All evaluated scenarios remain above the minimum cash buffer |
-| `CASH_AT_RISK` | At least one scenario would not be cash-safe |
-| `BUFFER_BREACH` | At least one scenario falls below `minimum_cash_buffer_jpy` but stays non-negative |
-| `NEGATIVE_CASH` | At least one scenario produces negative ending cash |
+| `CASH_SAFE` | EXPECTED is safe and DOWNSIDE is safe |
+| `CASH_AT_RISK` | EXPECTED is safe, but DOWNSIDE breaches the buffer or becomes negative |
+| `BUFFER_BREACH` | EXPECTED falls below `minimum_cash_buffer_jpy` but stays non-negative |
+| `NEGATIVE_CASH` | EXPECTED produces negative cash |
 
-Severity order: `NEGATIVE_CASH` > `BUFFER_BREACH` > `CASH_AT_RISK` > `CASH_SAFE`.
+SUCCESS remains visible as supporting scenario evidence but does not drive aggregate financial status.
 
 ### `OverallStatus`
 
@@ -61,10 +61,10 @@ These rules are explicit, documented, and implemented in `engine.py`:
    (hard operational failure dominates all other dimensions)
 
 2. FinancialStatus == NEGATIVE_CASH → PLAN_AT_RISK
-   (any scenario reaching negative cash is a critical risk)
+   (EXPECTED reaching negative cash is a critical risk)
 
 3. FinancialStatus == BUFFER_BREACH → PLAN_AT_RISK
-   (buffer breach in any scenario prevents PLAN_FEASIBLE or PLAN_PARTIAL)
+   (an EXPECTED buffer breach prevents PLAN_FEASIBLE or PLAN_PARTIAL)
 
 4. OperationalStatus == OPERATIONALLY_AT_RISK → PLAN_AT_RISK
    (mandatory item failure is a significant risk)
@@ -76,8 +76,7 @@ These rules are explicit, documented, and implemented in `engine.py`:
 7. OperationalStatus == OPERATIONALLY_FEASIBLE + CASH_SAFE → PLAN_FEASIBLE
 ```
 
-**Key invariant:** If ANY cash scenario becomes negative, `overall_status` must be at least `PLAN_AT_RISK`.
-Financial risk is never hidden because the expected scenario looks stronger than the downside.
+**Key invariant:** An unsafe DOWNSIDE makes aggregate status at least `CASH_AT_RISK` and overall status at least `PLAN_AT_RISK`, even when EXPECTED is safe.
 
 ---
 
@@ -85,7 +84,7 @@ Financial risk is never hidden because the expected scenario looks stronger than
 
 ### A. Mandatory Work
 - Every `mandatory=true` work item must appear in `plan.selected_actions` or `plan.mandatory_infeasible`.
-- Items in neither list trigger `MANDATORY_WORK_OMITTED` (ERROR).
+- Items in neither list trigger `MANDATORY_WORK_OMITTED` (ERROR) and make the supplied plan operationally infeasible.
 
 ### B. Dependency Ordering
 - Canonical `work_item.dependencies` define predecessor relationships; selected decisions map work-item IDs to planner action IDs.

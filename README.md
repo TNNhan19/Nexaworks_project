@@ -2,7 +2,7 @@
 
 Starter implementation for the four-week NexaWorks management decision challenge.
 
-## Current milestone -- Phase 2G: Final Validation + Explanation
+## Current milestone -- Phase 3: Reliability & Unseen-Data Testing
 
 ### Phase 1 (complete)
 
@@ -99,6 +99,16 @@ Starter implementation for the four-week NexaWorks management decision challenge
 - `docs/FINAL_VALIDATION.md` -- dimensional statuses, validation rules, provenance, no-replanning principle
 - Canonical result: `PLAN_AT_RISK` (operationally partial + financially NEGATIVE_CASH)
 
+### Phase 3 (complete) -- Reliability & Unseen-Data Testing
+
+- Synthetic same-schema factories with arbitrary people/work/resource/option/effect IDs
+- Dynamic-size coverage up to 12 people, 31 work items, 5 options per opportunity, and 4 resources/effects
+- Unseen skills and workforce languages, dependency graphs, mandatory/capacity/resource edges
+- Commercial, portfolio, scoring, planner, exact-JPY cash, and final-status reliability cases
+- Clean malformed-input/reference rejection and repeated-run determinism
+- Full arbitrary-ID unseen dataset through Phases 2A–2G
+- `docs/RELIABILITY_TESTING.md` -- strategy, coverage, production fix, and remaining limitations
+
 ## Run
 
 ```bash
@@ -135,7 +145,7 @@ cd backend
 pytest -q
 ```
 
-258 tests, 0 failures (as of Phase 2G).
+338 tests, 0 failures (as of Phase 3).
 
 ## Canonical Dataset Phase 2A Feasibility Results
 
