@@ -2,7 +2,7 @@
 
 Starter implementation for the four-week NexaWorks management decision challenge.
 
-## Current milestone -- Phase 3: Reliability & Unseen-Data Testing
+## Current milestone -- Phase 4: Backend API + Scenario Management
 
 ### Phase 1 (complete)
 
@@ -109,6 +109,15 @@ Starter implementation for the four-week NexaWorks management decision challenge
 - Full arbitrary-ID unseen dataset through Phases 2A–2G
 - `docs/RELIABILITY_TESTING.md` -- strategy, coverage, production fix, and remaining limitations
 
+### Phase 4 (complete) -- Backend API + Scenario Management
+
+- Immutable baseline plus strict, structured scenario overrides
+- SQLite persistence for scenarios and immutable full-pipeline run snapshots
+- One application service composing Phases 2A–2G without duplicating business rules
+- Scenario CRUD, execution history, retrieval, and structured two-run comparison
+- Baseline/scenario isolation and deterministic A → B → A execution coverage
+- `docs/SCENARIO_API.md` -- lifecycle, override contract, persistence, errors, and limitations
+
 ## Run
 
 ```bash
@@ -137,6 +146,12 @@ Useful endpoints:
 - `GET /api/v1/plan` / `POST /api/v1/plan`
 - `POST /api/v1/cash-flow`
 - `POST /api/v1/final-decision`
+- `GET /api/v1/baseline/summary`
+- `GET /api/v1/scenarios` / `POST /api/v1/scenarios`
+- `GET /api/v1/scenarios/{id}` / `PATCH /api/v1/scenarios/{id}` / `DELETE /api/v1/scenarios/{id}`
+- `POST /api/v1/scenarios/{id}/run` / `GET /api/v1/scenarios/{id}/runs`
+- `GET /api/v1/runs/{run_id}`
+- `GET /api/v1/runs/compare?run_a_id=...&run_b_id=...`
 
 ## Test
 
@@ -145,7 +160,7 @@ cd backend
 pytest -q
 ```
 
-338 tests, 0 failures (as of Phase 3).
+354 tests, 0 failures (as of Phase 4).
 
 ## Canonical Dataset Phase 2A Feasibility Results
 
