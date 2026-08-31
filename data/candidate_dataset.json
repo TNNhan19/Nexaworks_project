@@ -1,0 +1,1877 @@
+{
+  "metadata": {
+    "dataset_id": "NW-OPS-2026-01",
+    "version": "1.0.0",
+    "scenario_name": {
+      "ja": "NexaWorks 4週間経営判断ケース",
+      "en": "NexaWorks Four-Week Decision Case",
+      "vi": "Tình huống ra quyết định bốn tuần của NexaWorks"
+    },
+    "planning_start": "2026-10-05",
+    "planning_end": "2026-11-01",
+    "currency": "JPY",
+    "canonical_language": "en",
+    "note": {
+      "ja": "この会社・顧客・数値はすべて架空です。",
+      "en": "All companies, customers and figures are fictional.",
+      "vi": "Tất cả công ty, khách hàng và số liệu đều là hư cấu."
+    }
+  },
+  "company": {
+    "name": "NexaWorks",
+    "starting_cash_jpy": 12000000,
+    "fixed_cash_outflow_jpy": 8000000,
+    "minimum_cash_buffer_jpy": 5000000,
+    "risk_tolerance": "medium",
+    "objective_is_not_defined": true,
+    "decision_context": {
+      "ja": "全案件を実行する能力はありません。経営者が何を優先し、誰に任せ、何を見送るかを判断できるツールが必要です。",
+      "en": "There is not enough capacity to execute everything. Management needs a tool to decide what to prioritize, assign and decline.",
+      "vi": "Không đủ năng lực để thực hiện tất cả. Ban quản lý cần công cụ quyết định ưu tiên, phân công và từ chối việc nào."
+    }
+  },
+  "people": [
+    {
+      "id": "P001",
+      "name": "Aki Tanaka",
+      "role": {
+        "ja": "プロジェクト責任者",
+        "en": "Project Lead",
+        "vi": "Trưởng dự án"
+      },
+      "capacity_hours": 80,
+      "hourly_cost_jpy": 7200,
+      "skills": {
+        "project_management": 5,
+        "sales": 4,
+        "ai": 2,
+        "backend": 2,
+        "frontend": 1,
+        "field_installation": 3,
+        "quality": 4
+      },
+      "languages": [
+        "ja",
+        "en"
+      ],
+      "unavailable_ranges": [
+        {
+          "start": "2026-10-13",
+          "end": "2026-10-14"
+        }
+      ]
+    },
+    {
+      "id": "P002",
+      "name": "Minh Nguyen",
+      "role": {
+        "ja": "AIリード",
+        "en": "AI Lead",
+        "vi": "Trưởng nhóm AI"
+      },
+      "capacity_hours": 136,
+      "hourly_cost_jpy": 5100,
+      "skills": {
+        "project_management": 3,
+        "sales": 1,
+        "ai": 5,
+        "backend": 4,
+        "frontend": 2,
+        "field_installation": 2,
+        "quality": 4
+      },
+      "languages": [
+        "vi",
+        "en"
+      ],
+      "unavailable_ranges": []
+    },
+    {
+      "id": "P003",
+      "name": "Yuki Sato",
+      "role": {
+        "ja": "フルスタックエンジニア",
+        "en": "Full-stack Engineer",
+        "vi": "Kỹ sư full-stack"
+      },
+      "capacity_hours": 144,
+      "hourly_cost_jpy": 4800,
+      "skills": {
+        "project_management": 2,
+        "sales": 2,
+        "ai": 3,
+        "backend": 5,
+        "frontend": 5,
+        "field_installation": 2,
+        "quality": 3
+      },
+      "languages": [
+        "ja",
+        "en"
+      ],
+      "unavailable_ranges": []
+    },
+    {
+      "id": "P004",
+      "name": "Linh Tran",
+      "role": {
+        "ja": "AIエンジニア",
+        "en": "AI Engineer",
+        "vi": "Kỹ sư AI"
+      },
+      "capacity_hours": 112,
+      "hourly_cost_jpy": 3900,
+      "skills": {
+        "project_management": 2,
+        "sales": 1,
+        "ai": 4,
+        "backend": 3,
+        "frontend": 2,
+        "field_installation": 1,
+        "quality": 3
+      },
+      "languages": [
+        "vi",
+        "en"
+      ],
+      "unavailable_ranges": [
+        {
+          "start": "2026-10-20",
+          "end": "2026-10-22"
+        }
+      ]
+    },
+    {
+      "id": "P005",
+      "name": "Ken Ito",
+      "role": {
+        "ja": "営業・事業開発",
+        "en": "Sales / Business Development",
+        "vi": "Kinh doanh / Phát triển kinh doanh"
+      },
+      "capacity_hours": 120,
+      "hourly_cost_jpy": 4300,
+      "skills": {
+        "project_management": 3,
+        "sales": 5,
+        "ai": 1,
+        "backend": 1,
+        "frontend": 1,
+        "field_installation": 2,
+        "quality": 2
+      },
+      "languages": [
+        "ja",
+        "en"
+      ],
+      "unavailable_ranges": []
+    },
+    {
+      "id": "P006",
+      "name": "Mai Pham",
+      "role": {
+        "ja": "UI/UXデザイナー",
+        "en": "UI/UX Designer",
+        "vi": "Nhà thiết kế UI/UX"
+      },
+      "capacity_hours": 84,
+      "hourly_cost_jpy": 3600,
+      "skills": {
+        "project_management": 2,
+        "sales": 2,
+        "ai": 1,
+        "backend": 1,
+        "frontend": 4,
+        "field_installation": 1,
+        "quality": 3
+      },
+      "languages": [
+        "vi",
+        "en"
+      ],
+      "unavailable_ranges": []
+    },
+    {
+      "id": "P007",
+      "name": "Ryo Kato",
+      "role": {
+        "ja": "フィールド・品質担当",
+        "en": "Field / Quality Engineer",
+        "vi": "Kỹ sư hiện trường / chất lượng"
+      },
+      "capacity_hours": 72,
+      "hourly_cost_jpy": 4500,
+      "skills": {
+        "project_management": 2,
+        "sales": 2,
+        "ai": 2,
+        "backend": 2,
+        "frontend": 1,
+        "field_installation": 5,
+        "quality": 5
+      },
+      "languages": [
+        "ja"
+      ],
+      "unavailable_ranges": [
+        {
+          "start": "2026-10-26",
+          "end": "2026-10-28"
+        }
+      ]
+    }
+  ],
+  "customers": [
+    {
+      "id": "C001",
+      "name": "Hikari Foods",
+      "industry": "food",
+      "strategic_value": 5,
+      "payment_reliability": 5,
+      "reference_value": 4,
+      "relationship_risk": 5,
+      "default_payment_days": 30
+    },
+    {
+      "id": "C002",
+      "name": "Seiko Valve",
+      "industry": "manufacturing",
+      "strategic_value": 5,
+      "payment_reliability": 4,
+      "reference_value": 5,
+      "relationship_risk": 4,
+      "default_payment_days": 60
+    },
+    {
+      "id": "C003",
+      "name": "Aoba Pharma",
+      "industry": "pharma",
+      "strategic_value": 5,
+      "payment_reliability": 5,
+      "reference_value": 5,
+      "relationship_risk": 5,
+      "default_payment_days": 45
+    },
+    {
+      "id": "C004",
+      "name": "Kanto Logistics",
+      "industry": "logistics",
+      "strategic_value": 3,
+      "payment_reliability": 3,
+      "reference_value": 3,
+      "relationship_risk": 2,
+      "default_payment_days": 60
+    },
+    {
+      "id": "C005",
+      "name": "Vina Plastics",
+      "industry": "manufacturing",
+      "strategic_value": 4,
+      "payment_reliability": 3,
+      "reference_value": 4,
+      "relationship_risk": 3,
+      "default_payment_days": 75
+    },
+    {
+      "id": "C006",
+      "name": "Metro Hospital",
+      "industry": "healthcare",
+      "strategic_value": 5,
+      "payment_reliability": 5,
+      "reference_value": 5,
+      "relationship_risk": 4,
+      "default_payment_days": 90
+    },
+    {
+      "id": "C007",
+      "name": "Sunrise Cosmetics",
+      "industry": "cosmetics",
+      "strategic_value": 3,
+      "payment_reliability": 4,
+      "reference_value": 3,
+      "relationship_risk": 2,
+      "default_payment_days": 45
+    },
+    {
+      "id": "C008",
+      "name": "Takumi Components",
+      "industry": "manufacturing",
+      "strategic_value": 4,
+      "payment_reliability": 4,
+      "reference_value": 4,
+      "relationship_risk": 3,
+      "default_payment_days": 60
+    },
+    {
+      "id": "C009",
+      "name": "GreenTable",
+      "industry": "food_service",
+      "strategic_value": 2,
+      "payment_reliability": 2,
+      "reference_value": 3,
+      "relationship_risk": 2,
+      "default_payment_days": 75
+    },
+    {
+      "id": "C010",
+      "name": "Northstar Electronics",
+      "industry": "electronics",
+      "strategic_value": 4,
+      "payment_reliability": 4,
+      "reference_value": 5,
+      "relationship_risk": 3,
+      "default_payment_days": 60
+    }
+  ],
+  "shared_resources": [
+    {
+      "id": "R001",
+      "name": {
+        "ja": "画像検査ラボ",
+        "en": "Vision Inspection Lab",
+        "vi": "Phòng thí nghiệm kiểm tra hình ảnh"
+      },
+      "capacity_hours": 128,
+      "exclusive": true
+    },
+    {
+      "id": "R002",
+      "name": {
+        "ja": "現地設置キット",
+        "en": "On-site Installation Kit",
+        "vi": "Bộ thiết bị lắp đặt tại hiện trường"
+      },
+      "capacity_hours": 72,
+      "exclusive": true
+    }
+  ],
+  "work_items": [
+    {
+      "id": "W001",
+      "title": {
+        "ja": "食品工場AI検査の本番導入",
+        "en": "Production deployment for food inspection",
+        "vi": "Triển khai chính thức hệ thống kiểm tra thực phẩm"
+      },
+      "type": "delivery",
+      "status": "not_started",
+      "mandatory": true,
+      "committed": true,
+      "customer_id": "C001",
+      "revenue_jpy": 18000000,
+      "direct_cost_jpy": 5100000,
+      "cash_in_days": 30,
+      "success_probability": 1.0,
+      "required_hours": 210,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-25",
+      "late_penalty_jpy_per_day": 250000,
+      "strategic_value": 5,
+      "required_skills": [
+        {
+          "skill": "project_management",
+          "min_level": 4
+        },
+        {
+          "skill": "ai",
+          "min_level": 4
+        },
+        {
+          "skill": "field_installation",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [
+        {
+          "resource_id": "R001",
+          "hours": 45
+        },
+        {
+          "resource_id": "R002",
+          "hours": 32
+        }
+      ],
+      "dependencies": [
+        "W005"
+      ],
+      "conflicts": [],
+      "notes": {
+        "ja": "契約済み。11月の生産計画に影響するため遅延リスクが高い。",
+        "en": "Contracted. Delay would affect the customer production plan in November.",
+        "vi": "Đã ký hợp đồng. Chậm trễ sẽ ảnh hưởng kế hoạch sản xuất tháng 11."
+      }
+    },
+    {
+      "id": "W002",
+      "title": {
+        "ja": "製薬会社PoCの評価完了",
+        "en": "Complete pharmaceutical PoC evaluation",
+        "vi": "Hoàn tất đánh giá PoC dược phẩm"
+      },
+      "type": "delivery",
+      "status": "not_started",
+      "mandatory": true,
+      "committed": true,
+      "customer_id": "C003",
+      "revenue_jpy": 4200000,
+      "direct_cost_jpy": 650000,
+      "cash_in_days": 45,
+      "success_probability": 1.0,
+      "required_hours": 95,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-17",
+      "late_penalty_jpy_per_day": 100000,
+      "strategic_value": 5,
+      "required_skills": [
+        {
+          "skill": "ai",
+          "min_level": 4
+        },
+        {
+          "skill": "quality",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [
+        {
+          "resource_id": "R001",
+          "hours": 6
+        }
+      ],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "検収には再現性評価と簡潔な報告書が必要。",
+        "en": "Acceptance requires repeatability tests and a concise report.",
+        "vi": "Nghiệm thu cần kiểm tra độ lặp lại và báo cáo ngắn gọn."
+      }
+    },
+    {
+      "id": "W003",
+      "title": {
+        "ja": "病院の手指衛生システム障害対応",
+        "en": "Resolve hospital hand-hygiene system incident",
+        "vi": "Xử lý sự cố hệ thống vệ sinh tay tại bệnh viện"
+      },
+      "type": "incident",
+      "status": "not_started",
+      "mandatory": true,
+      "committed": true,
+      "customer_id": "C006",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 180000,
+      "cash_in_days": null,
+      "success_probability": 1.0,
+      "required_hours": 28,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-07",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 5,
+      "required_skills": [
+        {
+          "skill": "field_installation",
+          "min_level": 4
+        },
+        {
+          "skill": "quality",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [
+        {
+          "resource_id": "R002",
+          "hours": 12
+        }
+      ],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "売上は発生しないが、安全性と既存契約に関わる。",
+        "en": "No direct revenue, but it affects safety and an existing contract.",
+        "vi": "Không tạo doanh thu trực tiếp nhưng liên quan an toàn và hợp đồng hiện có."
+      }
+    },
+    {
+      "id": "W004",
+      "title": {
+        "ja": "既存SaaSの重大なセキュリティ修正",
+        "en": "Critical security patch for existing SaaS",
+        "vi": "Bản vá bảo mật nghiêm trọng cho SaaS hiện có"
+      },
+      "type": "incident",
+      "status": "not_started",
+      "mandatory": true,
+      "committed": true,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 1.0,
+      "required_hours": 48,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-10",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 5,
+      "required_skills": [
+        {
+          "skill": "backend",
+          "min_level": 4
+        },
+        {
+          "skill": "quality",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "外部監査で指摘。悪用事例は未確認。",
+        "en": "Found in an external audit; no exploitation has been confirmed.",
+        "vi": "Được phát hiện trong kiểm toán bên ngoài; chưa ghi nhận khai thác."
+      }
+    },
+    {
+      "id": "W005",
+      "title": {
+        "ja": "画像検査ラボの校正と基準データ作成",
+        "en": "Calibrate vision lab and create reference data",
+        "vi": "Hiệu chuẩn phòng lab thị giác và tạo dữ liệu chuẩn"
+      },
+      "type": "internal",
+      "status": "not_started",
+      "mandatory": true,
+      "committed": true,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 150000,
+      "cash_in_days": null,
+      "success_probability": 1.0,
+      "required_hours": 34,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-11",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "quality",
+          "min_level": 4
+        },
+        {
+          "skill": "ai",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [],
+      "resource_requirements": [
+        {
+          "resource_id": "R001",
+          "hours": 20
+        }
+      ],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "W001、W006、W007の前提。品質を落として短縮すると後工程の不確実性が増える。",
+        "en": "Prerequisite for W001, W006 and W007. Rushing it increases downstream uncertainty.",
+        "vi": "Là điều kiện tiên quyết cho W001, W006 và W007. Làm vội sẽ tăng rủi ro ở các bước sau."
+      }
+    },
+    {
+      "id": "W006",
+      "title": {
+        "ja": "バルブ外観検査の大型提案",
+        "en": "Large valve inspection proposal",
+        "vi": "Đề xuất lớn về kiểm tra ngoại quan van"
+      },
+      "type": "sales_opportunity",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": "C002",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 0.0,
+      "required_hours": 34,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-15",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 5,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 4
+        },
+        {
+          "skill": "ai",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [
+        {
+          "resource_id": "R001",
+          "hours": 18
+        }
+      ],
+      "dependencies": [
+        "W005"
+      ],
+      "conflicts": [],
+      "notes": {
+        "ja": "価格・PoC範囲・本導入への移行条件を選ぶ必要がある。",
+        "en": "Requires a pricing, PoC scope and conversion structure decision.",
+        "vi": "Cần quyết định giá, phạm vi PoC và điều kiện chuyển sang triển khai chính thức."
+      }
+    },
+    {
+      "id": "W007",
+      "title": {
+        "ja": "ベトナム工場向け画像検査提案",
+        "en": "Vision inspection proposal for Vietnam factory",
+        "vi": "Đề xuất kiểm tra hình ảnh cho nhà máy Việt Nam"
+      },
+      "type": "sales_opportunity",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": "C005",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 0.0,
+      "required_hours": 48,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-22",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 3
+        },
+        {
+          "skill": "ai",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "vi",
+        "en"
+      ],
+      "resource_requirements": [
+        {
+          "resource_id": "R001",
+          "hours": 12
+        }
+      ],
+      "dependencies": [
+        "W005"
+      ],
+      "conflicts": [],
+      "notes": {
+        "ja": "現地サポート体制を含む提案が必要。",
+        "en": "Proposal must include a local support model.",
+        "vi": "Đề xuất phải bao gồm mô hình hỗ trợ tại địa phương."
+      }
+    },
+    {
+      "id": "W008",
+      "title": {
+        "ja": "物流会社向け作業解析デモ",
+        "en": "Workflow analytics demo for logistics company",
+        "vi": "Demo phân tích quy trình cho công ty logistics"
+      },
+      "type": "sales_opportunity",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": "C004",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 0.0,
+      "required_hours": 32,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-13",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 3,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 4
+        },
+        {
+          "skill": "frontend",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "短期受注の可能性はあるが、値引き要求が強い。",
+        "en": "Potential for a quick deal, but the customer is price-sensitive.",
+        "vi": "Có khả năng chốt nhanh nhưng khách hàng yêu cầu giảm giá mạnh."
+      }
+    },
+    {
+      "id": "W009",
+      "title": {
+        "ja": "化粧品会社向け提案とサンプル検証",
+        "en": "Proposal and sample test for cosmetics company",
+        "vi": "Đề xuất và thử nghiệm mẫu cho công ty mỹ phẩm"
+      },
+      "type": "sales_opportunity",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": "C007",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 0.0,
+      "required_hours": 28,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-18",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 3,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 3
+        },
+        {
+          "skill": "ai",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "競合2社が参加。決裁は翌月。",
+        "en": "Two competitors are participating; decision is next month.",
+        "vi": "Có hai đối thủ tham gia; quyết định vào tháng sau."
+      }
+    },
+    {
+      "id": "W010",
+      "title": {
+        "ja": "電子部品会社の技術検証",
+        "en": "Technical validation for electronics manufacturer",
+        "vi": "Thẩm định kỹ thuật cho nhà sản xuất linh kiện điện tử"
+      },
+      "type": "sales_opportunity",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": "C010",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 0.0,
+      "required_hours": 60,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-27",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "ai",
+          "min_level": 5
+        },
+        {
+          "skill": "quality",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "成功すれば高い紹介価値があるが、技術難易度も高い。",
+        "en": "High reference value if successful, but technically difficult.",
+        "vi": "Giá trị tham chiếu cao nếu thành công nhưng độ khó kỹ thuật lớn."
+      }
+    },
+    {
+      "id": "W011",
+      "title": {
+        "ja": "飲食チェーンの低価格トライアル",
+        "en": "Low-price trial for restaurant chain",
+        "vi": "Thử nghiệm giá thấp cho chuỗi nhà hàng"
+      },
+      "type": "sales_opportunity",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": "C009",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 0.0,
+      "required_hours": 24,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-14",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 2,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 3
+        },
+        {
+          "skill": "backend",
+          "min_level": 2
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "低価格だが仕様変更要求が多い。支払遅延の懸念あり。",
+        "en": "Low price with many customization requests and payment-delay risk.",
+        "vi": "Giá thấp nhưng yêu cầu tùy chỉnh nhiều và có rủi ro thanh toán chậm."
+      }
+    },
+    {
+      "id": "W012",
+      "title": {
+        "ja": "研究開発助成金の申請",
+        "en": "R&D grant application",
+        "vi": "Nộp hồ sơ xin trợ cấp R&D"
+      },
+      "type": "corporate",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": 75,
+      "success_probability": 0.45,
+      "required_hours": 30,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-09",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "project_management",
+          "min_level": 4
+        },
+        {
+          "skill": "sales",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "採択時は1,200万円入金。採択確率は参考値であり、保証ではない。",
+        "en": "Pays JPY 12M if accepted. Probability is only an estimate.",
+        "vi": "Nhận 12 triệu JPY nếu được duyệt; xác suất chỉ là ước tính."
+      }
+    },
+    {
+      "id": "W013",
+      "title": {
+        "ja": "多言語業務プラットフォーム基盤",
+        "en": "Multilingual operations platform foundation",
+        "vi": "Nền tảng vận hành đa ngôn ngữ"
+      },
+      "type": "product",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 600000,
+      "cash_in_days": null,
+      "success_probability": 1.0,
+      "required_hours": 90,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-11-01",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 5,
+      "required_skills": [
+        {
+          "skill": "backend",
+          "min_level": 4
+        },
+        {
+          "skill": "frontend",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "今後の複数案件に再利用できるが、今月の直接売上はない。",
+        "en": "Reusable across future projects, but generates no direct revenue this month.",
+        "vi": "Có thể tái sử dụng cho nhiều dự án tương lai nhưng không tạo doanh thu trực tiếp tháng này."
+      }
+    },
+    {
+      "id": "W014",
+      "title": {
+        "ja": "営業パイプラインの整理と追客",
+        "en": "Clean sales pipeline and follow up leads",
+        "vi": "Sắp xếp pipeline bán hàng và theo dõi khách hàng tiềm năng"
+      },
+      "type": "sales",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 0.75,
+      "required_hours": 52,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-23",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 3,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "ja",
+        "en"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "8件の休眠案件を含む。成果は不確実だが、短期の案件化余地がある。",
+        "en": "Includes eight dormant leads; uncertain but may create near-term opportunities.",
+        "vi": "Bao gồm tám khách hàng tiềm năng không hoạt động; có thể tạo cơ hội ngắn hạn."
+      }
+    },
+    {
+      "id": "W015",
+      "title": {
+        "ja": "既存顧客向け管理ダッシュボード追加",
+        "en": "Add management dashboard for existing customer",
+        "vi": "Bổ sung dashboard quản lý cho khách hàng hiện tại"
+      },
+      "type": "delivery",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": "C003",
+      "revenue_jpy": 3600000,
+      "direct_cost_jpy": 350000,
+      "cash_in_days": 45,
+      "success_probability": 0.95,
+      "required_hours": 68,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-24",
+      "late_penalty_jpy_per_day": 40000,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "backend",
+          "min_level": 4
+        },
+        {
+          "skill": "frontend",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "未契約。今週中に着手可否を回答する必要がある。",
+        "en": "Not yet contracted; a go/no-go response is required this week.",
+        "vi": "Chưa ký hợp đồng; cần trả lời có triển khai hay không trong tuần này."
+      }
+    },
+    {
+      "id": "W016",
+      "title": {
+        "ja": "採用候補者3名の選考",
+        "en": "Screen three engineering candidates",
+        "vi": "Đánh giá ba ứng viên kỹ thuật"
+      },
+      "type": "hiring",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 1.0,
+      "required_hours": 26,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-21",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 3,
+      "required_skills": [
+        {
+          "skill": "project_management",
+          "min_level": 3
+        },
+        {
+          "skill": "ai",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [
+        "ja",
+        "en"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "採用できれば翌月以降の能力が増えるが、今期の工数には寄与しない。",
+        "en": "A hire increases future capacity, not capacity in this horizon.",
+        "vi": "Tuyển được người sẽ tăng năng lực trong tương lai, không tăng công suất kỳ này."
+      }
+    },
+    {
+      "id": "W017",
+      "title": {
+        "ja": "異常検知モデルの共通化",
+        "en": "Standardize anomaly detection model",
+        "vi": "Chuẩn hóa mô hình phát hiện bất thường"
+      },
+      "type": "product",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 900000,
+      "cash_in_days": null,
+      "success_probability": 0.75,
+      "required_hours": 86,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-30",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 5,
+      "required_skills": [
+        {
+          "skill": "ai",
+          "min_level": 5
+        },
+        {
+          "skill": "backend",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [],
+      "resource_requirements": [
+        {
+          "resource_id": "R001",
+          "hours": 28
+        }
+      ],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "成功時は将来の検証工数を削減できるが、技術的不確実性がある。",
+        "en": "Could reduce future validation effort if successful, but has technical uncertainty.",
+        "vi": "Có thể giảm công sức xác minh tương lai nếu thành công nhưng có bất định kỹ thuật."
+      }
+    },
+    {
+      "id": "W018",
+      "title": {
+        "ja": "顧客向けセキュリティ質問票対応",
+        "en": "Respond to customer security questionnaire",
+        "vi": "Trả lời bảng câu hỏi bảo mật của khách hàng"
+      },
+      "type": "delivery",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": "C006",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 1.0,
+      "required_hours": 44,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-16",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "backend",
+          "min_level": 3
+        },
+        {
+          "skill": "quality",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "回答遅延は追加導入の判断を遅らせる可能性がある。",
+        "en": "Delay may postpone the customer's expansion decision.",
+        "vi": "Chậm trả lời có thể trì hoãn quyết định mở rộng của khách hàng."
+      }
+    },
+    {
+      "id": "W019",
+      "title": {
+        "ja": "新型カメラの評価",
+        "en": "Evaluate new camera platform",
+        "vi": "Đánh giá nền tảng camera mới"
+      },
+      "type": "research",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 1200000,
+      "cash_in_days": null,
+      "success_probability": 0.7,
+      "required_hours": 84,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-29",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "ai",
+          "min_level": 4
+        },
+        {
+          "skill": "field_installation",
+          "min_level": 3
+        },
+        {
+          "skill": "quality",
+          "min_level": 4
+        }
+      ],
+      "required_languages": [],
+      "resource_requirements": [
+        {
+          "resource_id": "R001",
+          "hours": 18
+        }
+      ],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "成功すれば装置原価を約15%削減できる見込み。",
+        "en": "May reduce device cost by about 15% if successful.",
+        "vi": "Có thể giảm khoảng 15% chi phí thiết bị nếu thành công."
+      }
+    },
+    {
+      "id": "W020",
+      "title": {
+        "ja": "会社サイトと導入事例の更新",
+        "en": "Update company website and case studies",
+        "vi": "Cập nhật website công ty và case study"
+      },
+      "type": "marketing",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 80000,
+      "cash_in_days": null,
+      "success_probability": 1.0,
+      "required_hours": 26,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-28",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 2,
+      "required_skills": [
+        {
+          "skill": "frontend",
+          "min_level": 3
+        },
+        {
+          "skill": "sales",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [
+        "ja",
+        "en"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "営業資料の信頼性向上が目的。直接の売上効果は不明。",
+        "en": "Intended to improve sales credibility; direct revenue impact is unknown.",
+        "vi": "Mục tiêu là tăng độ tin cậy bán hàng; tác động doanh thu trực tiếp chưa rõ."
+      }
+    },
+    {
+      "id": "W021",
+      "title": {
+        "ja": "延滞売掛金の回収",
+        "en": "Collect overdue receivable",
+        "vi": "Thu hồi khoản phải thu quá hạn"
+      },
+      "type": "cash_collection",
+      "status": "not_started",
+      "mandatory": true,
+      "committed": true,
+      "customer_id": "C004",
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": 3,
+      "success_probability": 0.85,
+      "required_hours": 18,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-08",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 5,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 4
+        },
+        {
+          "skill": "project_management",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "回収対象は380万円。売上ではなくキャッシュへの影響として扱う必要がある。",
+        "en": "Target collection is JPY 3.8M. It affects cash, not new revenue.",
+        "vi": "Khoản cần thu là 3,8 triệu JPY. Đây là dòng tiền, không phải doanh thu mới."
+      }
+    },
+    {
+      "id": "W022",
+      "title": {
+        "ja": "ベトナム保守パートナー契約",
+        "en": "Contract a Vietnam maintenance partner",
+        "vi": "Ký hợp đồng với đối tác bảo trì tại Việt Nam"
+      },
+      "type": "partnership",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 250000,
+      "cash_in_days": null,
+      "success_probability": 0.65,
+      "required_hours": 32,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-26",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 4
+        },
+        {
+          "skill": "project_management",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [
+        "vi",
+        "en"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "W007の受注確率と現地サポート品質を改善する可能性がある。",
+        "en": "May improve W007 conversion probability and local support quality.",
+        "vi": "Có thể cải thiện xác suất chốt W007 và chất lượng hỗ trợ địa phương."
+      }
+    },
+    {
+      "id": "W023",
+      "title": {
+        "ja": "製造業展示会への出展準備",
+        "en": "Prepare for manufacturing trade show",
+        "vi": "Chuẩn bị triển lãm ngành sản xuất"
+      },
+      "type": "marketing",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 1100000,
+      "cash_in_days": null,
+      "success_probability": 0.55,
+      "required_hours": 46,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-10-31",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 3,
+      "required_skills": [
+        {
+          "skill": "sales",
+          "min_level": 4
+        },
+        {
+          "skill": "frontend",
+          "min_level": 2
+        }
+      ],
+      "required_languages": [
+        "ja"
+      ],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "将来リード獲得の期待はあるが、成果のばらつきが大きい。",
+        "en": "May generate future leads, but results vary widely.",
+        "vi": "Có thể tạo khách hàng tiềm năng trong tương lai nhưng kết quả biến động lớn."
+      }
+    },
+    {
+      "id": "W024",
+      "title": {
+        "ja": "社内品質レビュー手順の整備",
+        "en": "Establish internal quality review process",
+        "vi": "Thiết lập quy trình rà soát chất lượng nội bộ"
+      },
+      "type": "internal",
+      "status": "not_started",
+      "mandatory": false,
+      "committed": false,
+      "customer_id": null,
+      "revenue_jpy": 0,
+      "direct_cost_jpy": 0,
+      "cash_in_days": null,
+      "success_probability": 1.0,
+      "required_hours": 34,
+      "earliest_start": "2026-10-05",
+      "due_date": "2026-11-02",
+      "late_penalty_jpy_per_day": 0,
+      "strategic_value": 4,
+      "required_skills": [
+        {
+          "skill": "quality",
+          "min_level": 5
+        },
+        {
+          "skill": "project_management",
+          "min_level": 3
+        }
+      ],
+      "required_languages": [],
+      "resource_requirements": [],
+      "dependencies": [],
+      "conflicts": [],
+      "notes": {
+        "ja": "今後の手戻り削減が目的。今月中の効果は限定的。",
+        "en": "Intended to reduce future rework; limited effect within this month.",
+        "vi": "Mục tiêu là giảm làm lại trong tương lai; tác động trong tháng này còn hạn chế."
+      }
+    }
+  ],
+  "commercial_options": [
+    {
+      "work_item_id": "W006",
+      "option_id": "W006-A",
+      "label": {
+        "ja": "小規模有償PoC",
+        "en": "Small paid PoC",
+        "vi": "PoC trả phí quy mô nhỏ"
+      },
+      "price_jpy": 3500000,
+      "direct_cost_jpy": 700000,
+      "delivery_hours": 150,
+      "payment_days": 30,
+      "estimated_win_probability": 0.72,
+      "warranty_months": 1,
+      "follow_on_value_jpy": 15000000,
+      "notes": {
+        "ja": "入りやすいが、検証範囲は限定。",
+        "en": "Easy entry, limited validation scope.",
+        "vi": "Dễ bắt đầu nhưng phạm vi xác minh hạn chế."
+      }
+    },
+    {
+      "work_item_id": "W006",
+      "option_id": "W006-B",
+      "label": {
+        "ja": "本導入前提PoC",
+        "en": "Conversion-oriented PoC",
+        "vi": "PoC hướng tới triển khai chính thức"
+      },
+      "price_jpy": 7000000,
+      "direct_cost_jpy": 1600000,
+      "delivery_hours": 230,
+      "payment_days": 45,
+      "estimated_win_probability": 0.48,
+      "warranty_months": 2,
+      "follow_on_value_jpy": 25000000,
+      "notes": {
+        "ja": "本導入移行条件を明確化。",
+        "en": "Defines conversion conditions to production.",
+        "vi": "Làm rõ điều kiện chuyển sang triển khai chính thức."
+      }
+    },
+    {
+      "work_item_id": "W006",
+      "option_id": "W006-C",
+      "label": {
+        "ja": "一括本導入提案",
+        "en": "Direct full deployment",
+        "vi": "Đề xuất triển khai toàn bộ"
+      },
+      "price_jpy": 28500000,
+      "direct_cost_jpy": 8200000,
+      "delivery_hours": 520,
+      "payment_days": 90,
+      "estimated_win_probability": 0.2,
+      "warranty_months": 12,
+      "follow_on_value_jpy": 4000000,
+      "notes": {
+        "ja": "高単価だが、今期の人員では実行負荷が非常に高い。",
+        "en": "High value but extremely demanding under current capacity.",
+        "vi": "Giá trị cao nhưng tải triển khai rất lớn với năng lực hiện tại."
+      }
+    },
+    {
+      "work_item_id": "W007",
+      "option_id": "W007-A",
+      "label": {
+        "ja": "遠隔PoC",
+        "en": "Remote PoC",
+        "vi": "PoC từ xa"
+      },
+      "price_jpy": 2600000,
+      "direct_cost_jpy": 450000,
+      "delivery_hours": 120,
+      "payment_days": 60,
+      "estimated_win_probability": 0.58,
+      "warranty_months": 1,
+      "follow_on_value_jpy": 9000000,
+      "notes": {
+        "ja": "現地支援が弱いと受注後のリスクが高い。",
+        "en": "Post-sale risk is high without local support.",
+        "vi": "Rủi ro sau bán hàng cao nếu thiếu hỗ trợ địa phương."
+      }
+    },
+    {
+      "work_item_id": "W007",
+      "option_id": "W007-B",
+      "label": {
+        "ja": "現地パートナー付きPoC",
+        "en": "PoC with local partner",
+        "vi": "PoC có đối tác địa phương"
+      },
+      "price_jpy": 4200000,
+      "direct_cost_jpy": 1050000,
+      "delivery_hours": 155,
+      "payment_days": 60,
+      "estimated_win_probability": 0.67,
+      "warranty_months": 3,
+      "follow_on_value_jpy": 12000000,
+      "notes": {
+        "ja": "W022成立時に実行可能。",
+        "en": "Feasible only if W022 succeeds.",
+        "vi": "Chỉ khả thi nếu W022 thành công."
+      },
+      "dependencies": [
+        "W022"
+      ]
+    },
+    {
+      "work_item_id": "W007",
+      "option_id": "W007-C",
+      "label": {
+        "ja": "共同開発契約",
+        "en": "Joint-development agreement",
+        "vi": "Hợp đồng đồng phát triển"
+      },
+      "price_jpy": 6000000,
+      "direct_cost_jpy": 1300000,
+      "delivery_hours": 210,
+      "payment_days": 90,
+      "estimated_win_probability": 0.36,
+      "warranty_months": 6,
+      "follow_on_value_jpy": 18000000,
+      "notes": {
+        "ja": "知財・保守条件の交渉が必要。",
+        "en": "Requires IP and maintenance negotiation.",
+        "vi": "Cần đàm phán sở hữu trí tuệ và bảo trì."
+      }
+    },
+    {
+      "work_item_id": "W008",
+      "option_id": "W008-A",
+      "label": {
+        "ja": "標準価格",
+        "en": "Standard price",
+        "vi": "Giá tiêu chuẩn"
+      },
+      "price_jpy": 4200000,
+      "direct_cost_jpy": 500000,
+      "delivery_hours": 105,
+      "payment_days": 60,
+      "estimated_win_probability": 0.42,
+      "warranty_months": 3,
+      "follow_on_value_jpy": 3000000
+    },
+    {
+      "work_item_id": "W008",
+      "option_id": "W008-B",
+      "label": {
+        "ja": "早期決定割引",
+        "en": "Early-decision discount",
+        "vi": "Giảm giá khi quyết định sớm"
+      },
+      "price_jpy": 3300000,
+      "direct_cost_jpy": 500000,
+      "delivery_hours": 105,
+      "payment_days": 45,
+      "estimated_win_probability": 0.68,
+      "warranty_months": 2,
+      "follow_on_value_jpy": 2500000
+    },
+    {
+      "work_item_id": "W008",
+      "option_id": "W008-C",
+      "label": {
+        "ja": "低価格カスタム案",
+        "en": "Low-price customized offer",
+        "vi": "Đề xuất tùy chỉnh giá thấp"
+      },
+      "price_jpy": 2600000,
+      "direct_cost_jpy": 700000,
+      "delivery_hours": 160,
+      "payment_days": 75,
+      "estimated_win_probability": 0.82,
+      "warranty_months": 4,
+      "follow_on_value_jpy": 1500000,
+      "notes": {
+        "ja": "受注率は高いが、利益と工数効率が悪い。",
+        "en": "Higher win rate, poor margin and labor efficiency.",
+        "vi": "Tỷ lệ thắng cao nhưng biên lợi nhuận và hiệu suất công sức thấp."
+      }
+    },
+    {
+      "work_item_id": "W009",
+      "option_id": "W009-A",
+      "label": {
+        "ja": "サンプル評価のみ",
+        "en": "Sample evaluation only",
+        "vi": "Chỉ đánh giá mẫu"
+      },
+      "price_jpy": 900000,
+      "direct_cost_jpy": 180000,
+      "delivery_hours": 45,
+      "payment_days": 30,
+      "estimated_win_probability": 0.75,
+      "warranty_months": 0,
+      "follow_on_value_jpy": 5000000
+    },
+    {
+      "work_item_id": "W009",
+      "option_id": "W009-B",
+      "label": {
+        "ja": "ライン検証付きPoC",
+        "en": "PoC with line validation",
+        "vi": "PoC có xác minh trên dây chuyền"
+      },
+      "price_jpy": 4800000,
+      "direct_cost_jpy": 900000,
+      "delivery_hours": 170,
+      "payment_days": 45,
+      "estimated_win_probability": 0.38,
+      "warranty_months": 2,
+      "follow_on_value_jpy": 11000000
+    },
+    {
+      "work_item_id": "W010",
+      "option_id": "W010-A",
+      "label": {
+        "ja": "技術検証契約",
+        "en": "Technical validation contract",
+        "vi": "Hợp đồng thẩm định kỹ thuật"
+      },
+      "price_jpy": 5500000,
+      "direct_cost_jpy": 1700000,
+      "delivery_hours": 210,
+      "payment_days": 60,
+      "estimated_win_probability": 0.46,
+      "warranty_months": 1,
+      "follow_on_value_jpy": 22000000
+    },
+    {
+      "work_item_id": "W010",
+      "option_id": "W010-B",
+      "label": {
+        "ja": "共同研究",
+        "en": "Joint research",
+        "vi": "Nghiên cứu chung"
+      },
+      "price_jpy": 3000000,
+      "direct_cost_jpy": 1100000,
+      "delivery_hours": 260,
+      "payment_days": 90,
+      "estimated_win_probability": 0.62,
+      "warranty_months": 0,
+      "follow_on_value_jpy": 30000000,
+      "notes": {
+        "ja": "研究成果の権利条件に注意。",
+        "en": "Pay attention to research IP terms.",
+        "vi": "Cần chú ý điều khoản quyền sở hữu kết quả nghiên cứu."
+      }
+    },
+    {
+      "work_item_id": "W011",
+      "option_id": "W011-A",
+      "label": {
+        "ja": "要求通りの低価格案",
+        "en": "Requested low-price plan",
+        "vi": "Phương án giá thấp theo yêu cầu"
+      },
+      "price_jpy": 650000,
+      "direct_cost_jpy": 260000,
+      "delivery_hours": 70,
+      "payment_days": 90,
+      "estimated_win_probability": 0.8,
+      "warranty_months": 3,
+      "follow_on_value_jpy": 800000
+    },
+    {
+      "work_item_id": "W011",
+      "option_id": "W011-B",
+      "label": {
+        "ja": "標準化した限定プラン",
+        "en": "Standardized limited plan",
+        "vi": "Gói giới hạn tiêu chuẩn hóa"
+      },
+      "price_jpy": 980000,
+      "direct_cost_jpy": 220000,
+      "delivery_hours": 42,
+      "payment_days": 60,
+      "estimated_win_probability": 0.52,
+      "warranty_months": 1,
+      "follow_on_value_jpy": 1200000
+    },
+    {
+      "work_item_id": "W011",
+      "option_id": "W011-C",
+      "label": {
+        "ja": "見送り",
+        "en": "No-bid",
+        "vi": "Không chào giá"
+      },
+      "price_jpy": 0,
+      "direct_cost_jpy": 0,
+      "delivery_hours": 0,
+      "payment_days": 0,
+      "estimated_win_probability": 1.0,
+      "warranty_months": 0,
+      "follow_on_value_jpy": 0
+    },
+    {
+      "work_item_id": "W012",
+      "option_id": "W012-A",
+      "label": {
+        "ja": "申請する",
+        "en": "Apply",
+        "vi": "Nộp hồ sơ"
+      },
+      "price_jpy": 12000000,
+      "direct_cost_jpy": 0,
+      "delivery_hours": 30,
+      "payment_days": 75,
+      "estimated_win_probability": 0.45,
+      "warranty_months": 0,
+      "follow_on_value_jpy": 0
+    },
+    {
+      "work_item_id": "W012",
+      "option_id": "W012-B",
+      "label": {
+        "ja": "見送る",
+        "en": "Do not apply",
+        "vi": "Không nộp"
+      },
+      "price_jpy": 0,
+      "direct_cost_jpy": 0,
+      "delivery_hours": 0,
+      "payment_days": 0,
+      "estimated_win_probability": 1.0,
+      "warranty_months": 0,
+      "follow_on_value_jpy": 0
+    }
+  ],
+  "portfolio_effects": [
+    {
+      "id": "E001",
+      "trigger": "W005",
+      "targets": [
+        "W001",
+        "W006",
+        "W007"
+      ],
+      "effect": {
+        "type": "quality_prerequisite",
+        "description": {
+          "ja": "未完了の場合、対象案件の技術成功確率低下と手戻りリスク。",
+          "en": "If incomplete, technical success probability falls and rework risk rises.",
+          "vi": "Nếu chưa hoàn tất, xác suất thành công kỹ thuật giảm và rủi ro làm lại tăng."
+        }
+      }
+    },
+    {
+      "id": "E002",
+      "trigger": "W013",
+      "targets": [
+        "W015"
+      ],
+      "effect": {
+        "type": "hours_reduction",
+        "value": 0.25,
+        "description": {
+          "ja": "W015着手前に完了すると必要工数を25%削減。",
+          "en": "Reduces W015 required hours by 25% if completed first.",
+          "vi": "Giảm 25% số giờ cần cho W015 nếu hoàn thành trước."
+        }
+      }
+    },
+    {
+      "id": "E003",
+      "trigger": "W017",
+      "targets": [
+        "W010",
+        "W019"
+      ],
+      "effect": {
+        "type": "future_hours_reduction",
+        "value": 0.2,
+        "probability": 0.75,
+        "description": {
+          "ja": "成功時、類似検証の将来工数を20%削減。",
+          "en": "If successful, reduces future similar validation effort by 20%.",
+          "vi": "Nếu thành công, giảm 20% công sức xác minh tương tự trong tương lai."
+        }
+      }
+    },
+    {
+      "id": "E004",
+      "trigger": "W022",
+      "targets": [
+        "W007-B"
+      ],
+      "effect": {
+        "type": "commercial_option_unlock",
+        "description": {
+          "ja": "W007-Bを選択可能にする。",
+          "en": "Unlocks W007-B.",
+          "vi": "Mở khóa W007-B."
+        }
+      }
+    },
+    {
+      "id": "E005",
+      "trigger": "W021",
+      "targets": [
+        "company_cash"
+      ],
+      "effect": {
+        "type": "cash_inflow",
+        "value_jpy": 3800000,
+        "probability": 0.85,
+        "description": {
+          "ja": "回収成功時に3日後のキャッシュへ反映。新規売上ではない。",
+          "en": "Adds cash in three days if collected; it is not new revenue.",
+          "vi": "Bổ sung tiền mặt sau ba ngày nếu thu hồi thành công; không phải doanh thu mới."
+        }
+      }
+    }
+  ],
+  "enumerations": {
+    "work_item_types": [
+      "delivery",
+      "incident",
+      "sales_opportunity",
+      "sales",
+      "internal",
+      "product",
+      "research",
+      "corporate",
+      "hiring",
+      "marketing",
+      "cash_collection",
+      "partnership"
+    ],
+    "skills": [
+      "project_management",
+      "sales",
+      "ai",
+      "backend",
+      "frontend",
+      "field_installation",
+      "quality"
+    ],
+    "languages": [
+      "ja",
+      "en",
+      "vi"
+    ]
+  }
+}

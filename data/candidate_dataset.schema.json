@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/nexaworks/candidate-dataset.schema.json",
+  "title": "NexaWorks Candidate Dataset",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "metadata",
+    "company",
+    "people",
+    "customers",
+    "shared_resources",
+    "work_items",
+    "commercial_options",
+    "portfolio_effects"
+  ],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "dataset_id",
+        "version",
+        "planning_start",
+        "planning_end",
+        "currency"
+      ]
+    },
+    "company": {
+      "type": "object",
+      "required": [
+        "name",
+        "starting_cash_jpy",
+        "fixed_cash_outflow_jpy",
+        "minimum_cash_buffer_jpy"
+      ]
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "capacity_hours",
+          "skills",
+          "languages"
+        ]
+      }
+    },
+    "customers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "strategic_value",
+          "payment_reliability"
+        ]
+      }
+    },
+    "shared_resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "capacity_hours"
+        ]
+      }
+    },
+    "work_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "type",
+          "mandatory",
+          "required_hours",
+          "earliest_start",
+          "due_date",
+          "required_skills",
+          "resource_requirements",
+          "dependencies"
+        ]
+      }
+    },
+    "commercial_options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "work_item_id",
+          "option_id",
+          "label",
+          "price_jpy",
+          "delivery_hours",
+          "estimated_win_probability"
+        ]
+      }
+    },
+    "portfolio_effects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "trigger",
+          "targets",
+          "effect"
+        ]
+      }
+    }
+  }
+}
