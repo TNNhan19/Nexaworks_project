@@ -1,0 +1,56 @@
+"""Machine-readable Phase 2D scoring states and reason codes."""
+from enum import Enum
+
+
+class ActionType(str, Enum):
+    DO_WORK_ITEM = "DO_WORK_ITEM"
+    SELECT_OPTION = "SELECT_OPTION"
+
+
+class SelectionStatus(str, Enum):
+    ELIGIBLE = "ELIGIBLE"
+    BLOCKED = "BLOCKED"
+    LOCKED = "LOCKED"
+    EXPIRED = "EXPIRED"
+    INFEASIBLE = "INFEASIBLE"
+    INVALID = "INVALID"
+
+
+class ScoringSeverity(str, Enum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+
+
+class ScoringReasonCode(str, Enum):
+    SCORING_ELIGIBLE = "SCORING_ELIGIBLE"
+    SCORING_BLOCKED = "SCORING_BLOCKED"
+    SCORING_LOCKED = "SCORING_LOCKED"
+    SCORING_EXPIRED = "SCORING_EXPIRED"
+    SCORING_INFEASIBLE = "SCORING_INFEASIBLE"
+    SCORING_INVALID = "SCORING_INVALID"
+    COMPONENT_NOT_APPLICABLE = "COMPONENT_NOT_APPLICABLE"
+    COMPONENT_WEIGHTS_RENORMALIZED = "COMPONENT_WEIGHTS_RENORMALIZED"
+    NORMALIZATION_REFERENCE_BUILT = "NORMALIZATION_REFERENCE_BUILT"
+    NORMALIZATION_REFERENCE_REUSED = "NORMALIZATION_REFERENCE_REUSED"
+    NEGATIVE_ECONOMIC_VALUE = "NEGATIVE_ECONOMIC_VALUE"
+    PORTFOLIO_RISK_PRESENT = "PORTFOLIO_RISK_PRESENT"
+
+
+class ComponentName(str, Enum):
+    ECONOMIC_VALUE = "economic_value"
+    STRATEGIC_CUSTOMER = "strategic_customer"
+    URGENCY_COST_OF_DELAY = "urgency_cost_of_delay"
+    CASH_TIMING = "cash_timing"
+    FOLLOW_ON_VALUE = "follow_on_value"
+    CAPACITY_EFFICIENCY = "capacity_efficiency"
+    RISK_RESILIENCE = "risk_resilience"
+
+
+class ReferenceSource(str, Enum):
+    CURRENT_SNAPSHOT = "CURRENT_SNAPSHOT"
+
+
+class ReferenceUsage(str, Enum):
+    BUILT = "BUILT"
+    REUSED = "REUSED"
