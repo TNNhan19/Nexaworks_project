@@ -165,3 +165,18 @@ This is a V1 modeling assumption (not a dataset fact), documented in `Assumption
 - `NO_BID` is emitted only as a Planner decision when no canonical option is selected.
 - Soft deadlines may be late with structured evidence; sales-opportunity expiry remains hard.
 - Candidate attempts are transactional: a failed target does not leave speculative prerequisites consuming capacity.
+
+---
+
+## Phase 2F -- Cash-Flow Simulator Notes
+
+- Starting cash and minimum buffer come from company data; neither is hard-coded.
+- The horizon-only fixed outflow uses PRORATED_OVER_HORIZON with exact integer-JPY remainder allocation.
+- Selected non-commercial direct costs use PRORATED_OVER_EXECUTION.
+- Deterministic work receipts require committed=true and occur at completion plus cash_in_days.
+- Positive noncommitted work revenue is not silently treated as guaranteed cash.
+- Selected-option receipts use last reserved-delivery date plus payment_days.
+- Commercial delivery cost is conditional on win: full/expected/zero in SUCCESS/EXPECTED/DOWNSIDE.
+- E005 uses Phase 2B amount/probability and trigger completion plus trigger cash_in_days.
+- Outside-horizon receipts remain future events and do not improve the four-week balance.
+- Late penalty is excluded from cash by default because the Data Dictionary does not establish a cash obligation.

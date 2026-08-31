@@ -2,7 +2,7 @@
 
 Starter implementation for the four-week NexaWorks management decision challenge.
 
-## Current milestone -- Phase 2E: Heuristic Planner
+## Current milestone -- Phase 2F: Cash-Flow Simulator
 
 ### Phase 1 (complete)
 
@@ -76,6 +76,16 @@ Starter implementation for the four-week NexaWorks management decision challenge
 - API endpoints: `GET /api/v1/plan` and `POST /api/v1/plan`
 - `docs/PLANNER.md` -- heuristic, assumptions, result contract, and limitations
 
+### Phase 2F (complete) -- Cash-Flow Simulator
+
+- Independent EXPECTED, DOWNSIDE, and SUCCESS daily cash ledgers
+- Exact integer-JPY proration and reconciliation
+- Fixed outflow, work costs/receipts, selected-option conditional cash, and E005
+- Outside-horizon future events separated from current cash
+- Minimum-buffer and negative-cash detection with structured evidence
+- API endpoint: POST /api/v1/cash-flow
+- docs/CASH_FLOW.md -- event timing, scenario rules, assumptions, and limitations
+
 ## Run
 
 ```bash
@@ -101,6 +111,8 @@ Useful endpoints:
 - `GET /api/v1/commercial/{work_item_id}`
 - `GET /api/v1/scoring`
 - `GET /api/v1/scoring/{action_id}`
+- `GET /api/v1/plan` / `POST /api/v1/plan`
+- `POST /api/v1/cash-flow`
 
 ## Test
 
@@ -108,6 +120,8 @@ Useful endpoints:
 cd backend
 pytest -q
 ```
+
+219 tests, 0 failures (as of Phase 2F).
 
 ## Canonical Dataset Phase 2A Feasibility Results
 
@@ -140,6 +154,6 @@ E005  cash_inflow               W021 -> company_cash    p=0.85, +3.8M JPY if W02
 
 > **Important:** Portfolio effects evaluation only. Not a final business recommendation. Scoring and planning are deferred to Phase 2D-2E.
 
-## Next milestone -- Phase 2E: Heuristic Planner
+## Next milestone -- Phase 2G: Final Validation + Explanation
 
-Use operational constraints plus Phase 2D business-value scores to make the actual constrained selection, including planner-level `NO_BID`. Phase 2D scores alone are not a final plan.
+Integrate the planner and cash-flow outputs into one read-only final verdict with structured validation findings and provenance.

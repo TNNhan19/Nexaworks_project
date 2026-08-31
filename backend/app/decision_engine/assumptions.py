@@ -73,6 +73,30 @@ class AssumptionRegistry(BaseModel):
         "reserved_capacity"
     )
 
+    # --- Phase 2F cash-flow assumptions ---------------------------------------
+    fixed_outflow_timing: Literal["prorated_over_horizon"] = (
+        "prorated_over_horizon"
+    )
+    work_cash_receipt_timing: Literal["completion_plus_cash_in_days"] = (
+        "completion_plus_cash_in_days"
+    )
+    work_revenue_cash_policy: Literal["committed_only"] = "committed_only"
+    commercial_receipt_timing: Literal[
+        "delivery_reservation_completion_plus_payment_days"
+    ] = "delivery_reservation_completion_plus_payment_days"
+    commercial_direct_cost_timing: Literal[
+        "prorated_over_reserved_delivery"
+    ] = "prorated_over_reserved_delivery"
+    commercial_direct_cost_probability: Literal["conditional_on_win"] = (
+        "conditional_on_win"
+    )
+    commercial_cost_source_policy: Literal["selected_option_only"] = (
+        "selected_option_only"
+    )
+    late_penalty_cash_timing: Literal[
+        "not_included_without_cash_semantics", "at_completion"
+    ] = "not_included_without_cash_semantics"
+
     # --- Language coverage configuration -----------------------------------------
     # CUSTOMER_FACING_COVERAGE policy: to count as eligible for a required language,
     # a person must speak the language AND (if language_customer_facing_skill is set)
