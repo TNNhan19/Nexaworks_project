@@ -2,7 +2,7 @@
 
 Starter implementation for the four-week NexaWorks management decision challenge.
 
-## Current milestone -- Phase 2F: Cash-Flow Simulator
+## Current milestone -- Phase 2G: Final Validation + Explanation
 
 ### Phase 1 (complete)
 
@@ -86,6 +86,19 @@ Starter implementation for the four-week NexaWorks management decision challenge
 - API endpoint: POST /api/v1/cash-flow
 - docs/CASH_FLOW.md -- event timing, scenario rules, assumptions, and limitations
 
+### Phase 2G (complete) -- Final Validation + Explanation
+
+- `backend/app/decision_engine/final_validation/` -- pure Python engine, no FastAPI dependency
+  - `reason_codes.py` -- OperationalStatus, FinancialStatus, OverallStatus, ExplanationCode, SourcePhase
+  - `models.py` -- FinalDecisionResult, ExplanationRecord, DecisionExplanation, MandatorySummary, etc.
+  - `validators.py` -- read-only structural validation functions; never mutate upstream results
+  - `explainer.py` -- per-decision explanation builder; CashSummary builder; CASH_TIMING_MISMATCH detection
+  - `engine.py` -- FinalValidationEngine.validate() orchestrator; status propagation rules
+- API endpoint: `POST /api/v1/final-decision`
+- 258 total automated tests (all passing), including 39 Phase 2G tests
+- `docs/FINAL_VALIDATION.md` -- dimensional statuses, validation rules, provenance, no-replanning principle
+- Canonical result: `PLAN_AT_RISK` (operationally partial + financially NEGATIVE_CASH)
+
 ## Run
 
 ```bash
@@ -113,6 +126,7 @@ Useful endpoints:
 - `GET /api/v1/scoring/{action_id}`
 - `GET /api/v1/plan` / `POST /api/v1/plan`
 - `POST /api/v1/cash-flow`
+- `POST /api/v1/final-decision`
 
 ## Test
 
@@ -121,7 +135,7 @@ cd backend
 pytest -q
 ```
 
-219 tests, 0 failures (as of Phase 2F).
+258 tests, 0 failures (as of Phase 2G).
 
 ## Canonical Dataset Phase 2A Feasibility Results
 
@@ -154,6 +168,33 @@ E005  cash_inflow               W021 -> company_cash    p=0.85, +3.8M JPY if W02
 
 > **Important:** Portfolio effects evaluation only. Not a final business recommendation. Scoring and planning are deferred to Phase 2D-2E.
 
-## Next milestone -- Phase 2G: Final Validation + Explanation
+## Canonical Dataset Phase 2G Final Decision
 
-Integrate the planner and cash-flow outputs into one read-only final verdict with structured validation findings and provenance.
+```
+Overall status      : PLAN_AT_RISK
+Operational status  : OPERATIONALLY_PARTIAL
+Financial status    : NEGATIVE_CASH
+
+Selected            : 10 actions
+Delayed             : 9 actions
+NO-BID              : 6 opportunities
+Mandatory           : 6/6 scheduled (0 infeasible)
+
+Capacity used       : 737/748 hrs (98.5%)
+
+EXPECTED ending cash: JPY -700,000   (buffer breach 2026-10-21, 12 days)
+DOWNSIDE ending cash: JPY -3,930,000 (buffer breach 2026-10-17, 16 days)
+SUCCESS ending cash : JPY -130,000   (buffer breach 2026-10-22, 11 days)
+
+Future receipts (outside horizon):
+  W001  2026-11-21  JPY 18,000,000
+  W002  2026-11-27  JPY  4,200,000
+  W012-A 2027-01-08 JPY  5,400,000
+
+Main risks    : NEGATIVE_CASH_EXPECTED, CASH_BUFFER_BREACH, CASH_TIMING_MISMATCH
+Main strengths: MANDATORY_WORK_SCHEDULED, PERSON_CAPACITY_VALID
+```
+
+> Structurally solvent (JPY 27.6M future receipts) but a timing gap causes
+> negative in-horizon cash across all scenarios. No code changes required —
+> this is the correct Phase 2G validated result.

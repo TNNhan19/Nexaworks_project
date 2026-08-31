@@ -180,3 +180,43 @@ This is a V1 modeling assumption (not a dataset fact), documented in `Assumption
 - E005 uses Phase 2B amount/probability and trigger completion plus trigger cash_in_days.
 - Outside-horizon receipts remain future events and do not improve the four-week balance.
 - Late penalty is excluded from cash by default because the Data Dictionary does not establish a cash obligation.
+
+---
+
+## Phase 2G -- Final Validation + Explanation Notes
+
+These notes capture decisions made during Phase 2G implementation.
+
+### No-replanning principle
+
+Phase 2G validates and explains only. It receives frozen `PlanResult` and `CashFlowResult` and never:
+- Calls `PlannerEngine` to fix or improve the plan.
+- Calls `CashFlowSimulator` to recalculate cash.
+- Modifies any upstream result object.
+- Silently repairs a hard constraint violation.
+
+If a violation is detected, it is returned as an `ExplanationRecord` with the appropriate severity.
+
+### Status propagation rules (explicit)
+
+1. `OPERATIONALLY_INFEASIBLE` → `PLAN_INFEASIBLE` (hard failure dominates).
+2. Any scenario reaches `NEGATIVE_CASH` → at least `PLAN_AT_RISK`.
+3. Any scenario reaches `BUFFER_BREACH` → at least `PLAN_AT_RISK`.
+4. `OPERATIONALLY_AT_RISK` (mandatory infeasible or omitted) → `PLAN_AT_RISK`.
+5. `CASH_AT_RISK` (from Phase 2F overall status) → `PLAN_AT_RISK`.
+6. `OPERATIONALLY_PARTIAL` + `CASH_SAFE` → `PLAN_PARTIAL`.
+7. `OPERATIONALLY_FEASIBLE` + `CASH_SAFE` → `PLAN_FEASIBLE`.
+
+Financial severity order (worst wins): `NEGATIVE_CASH` > `BUFFER_BREACH` > `CASH_AT_RISK` > `CASH_SAFE`.
+
+### Explanation provenance
+
+Every `ExplanationRecord` carries a `source_phase` field. Phase 2G findings use `FINAL_VALIDATION`; forwarded findings from upstream phases preserve their original `source_phase` (`PLANNER`, `CASH_FLOW`, etc.).
+
+### Localization policy
+
+Phase 2G produces no natural-language strings. All output uses `ExplanationCode` enum values. Frontend `react-i18next` is responsible for JA / EN / VI translation.
+
+### Cash Timing Mismatch
+
+`CASH_TIMING_MISMATCH` is emitted when substantial future receipts exist but in-horizon cash becomes unsafe. This distinguishes "business is structurally solvent" from "the four-week window has a timing gap". Evidence includes: in-horizon outflows, in-horizon receipts, future receipts total, and expected ending cash.
