@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { NavIcon } from './NavIcon'
 import { navigationItems } from './navigation'
+import nexaWorksLogo from '../../logo/NexaWorks_logo.png'
 
 interface SidebarProps { open: boolean; onClose: () => void }
 
@@ -10,8 +11,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   return <>
     <aside className={`sidebar${open ? ' sidebar--open' : ''}`} aria-label="Primary navigation">
       <div className="brand">
-        <div className="brand__mark" aria-hidden="true">N</div>
-        <div><strong>{t('appName')}</strong><span>{t('appSubtitle')}</span></div>
+        <img className="brand__logo" src={nexaWorksLogo} alt={`${t('appName')} ${t('appSubtitle')}`} />
       </div>
       <nav className="nav-list">
         {navigationItems.map((item) => (
@@ -20,7 +20,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           </NavLink>
         ))}
       </nav>
-      <div className="sidebar__footer"><span className="status-dot" />API v1</div>
     </aside>
     {open && <button className="sidebar-backdrop" onClick={onClose} aria-label={t('header.closeMenu')} />}
   </>
