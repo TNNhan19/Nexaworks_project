@@ -17,16 +17,37 @@ export class ApiClientError extends Error {
   }
 }
 
+type FastApiValidationError = { loc?: Array<string | number>; msg?: string; type?: string }
+
+function validationDetails(detail: unknown): string[] {
+  if (!Array.isArray(detail)) return []
+  return detail.map((item: unknown) => {
+    if (!item || typeof item !== 'object') return String(item)
+    const validation = item as FastApiValidationError
+    const location = validation.loc?.filter((part) => part !== 'body').join('.')
+    const message = validation.msg ?? validation.type ?? 'Invalid value'
+    return location ? `${location}: ${message}` : message
+  })
+}
+
 async function parseError(response: Response): Promise<ApiClientError> {
-  let body: { detail?: StructuredErrorDetail | string } | undefined
+  let body: { detail?: StructuredErrorDetail | string | FastApiValidationError[] } | undefined
   try {
-    body = await response.json() as { detail?: StructuredErrorDetail | string }
+    body = await response.json() as typeof body
   } catch {
     return new ApiClientError(response.statusText || 'Request failed', response.status)
   }
   const detail = body?.detail
   if (typeof detail === 'string') {
     return new ApiClientError(detail, response.status)
+  }
+  if (Array.isArray(detail)) {
+    return new ApiClientError(
+      response.status === 422 ? 'Request validation failed.' : (response.statusText || 'Request failed'),
+      response.status,
+      'VALIDATION_ERROR',
+      validationDetails(detail),
+    )
   }
   return new ApiClientError(
     detail?.message ?? response.statusText ?? 'Request failed',

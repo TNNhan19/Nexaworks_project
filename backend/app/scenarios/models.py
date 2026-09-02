@@ -67,6 +67,7 @@ class ScenarioOverrides(StrictModel):
     work_items: list[WorkItemOverride] = Field(default_factory=list)
     commercial_options: list[CommercialOptionOverride] = Field(default_factory=list)
     resources: list[ResourceOverride] = Field(default_factory=list)
+    deferred_work_item_ids: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def unique_targets(self):
@@ -80,6 +81,12 @@ class ScenarioOverrides(StrictModel):
             duplicates = sorted({value for value in values if values.count(value) > 1})
             if duplicates:
                 raise ValueError(f"duplicate {label} override targets: {duplicates}")
+        deferred_duplicates = sorted({
+            value for value in self.deferred_work_item_ids
+            if self.deferred_work_item_ids.count(value) > 1
+        })
+        if deferred_duplicates:
+            raise ValueError(f"duplicate deferred work item IDs: {deferred_duplicates}")
         return self
 
 

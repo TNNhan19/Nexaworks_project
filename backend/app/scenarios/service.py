@@ -9,7 +9,7 @@ from app.services.baseline_summary import summary_as_dict
 from app.services.dataset_loader import load_dataset
 
 from .comparison import compare_runs
-from .errors import RunNotFoundError, ScenarioNotFoundError
+from .errors import RunNotFoundError, ScenarioNotFoundError, ScenarioValidationError
 from .models import RunComparison, Scenario, ScenarioCreate, ScenarioPatch, ScenarioRun
 from .overrides import apply_overrides
 from .pipeline import DecisionPipelineService
@@ -44,8 +44,25 @@ class ScenarioService:
             "minimum_cash_buffer_jpy": dataset.company.minimum_cash_buffer_jpy,
         }
 
+    @staticmethod
+    def _validate_manual_constraints(dataset, overrides) -> None:
+        work = {item.id: item for item in dataset.work_items}
+        unknown = sorted(set(overrides.deferred_work_item_ids) - set(work))
+        mandatory = sorted(
+            work_id for work_id in overrides.deferred_work_item_ids
+            if work_id in work and work[work_id].mandatory
+        )
+        errors = []
+        if unknown:
+            errors.append(f"unknown deferred work item IDs: {unknown}")
+        if mandatory:
+            errors.append(f"mandatory work cannot be manually deferred: {mandatory}")
+        if errors:
+            raise ScenarioValidationError("Scenario manual constraints are invalid", errors)
+
     def create(self, request: ScenarioCreate) -> Scenario:
-        apply_overrides(self._baseline(), request.overrides)
+        effective = apply_overrides(self._baseline(), request.overrides)
+        self._validate_manual_constraints(effective, request.overrides)
         timestamp = _now()
         scenario = Scenario(
             id=str(uuid4()),
@@ -77,7 +94,8 @@ class ScenarioService:
         candidate = Scenario.model_validate(
             current.model_copy(update={**changes, "updated_at": _now()}).model_dump()
         )
-        apply_overrides(self._baseline(), candidate.overrides)
+        effective = apply_overrides(self._baseline(), candidate.overrides)
+        self._validate_manual_constraints(effective, candidate.overrides)
         self.repository.save_scenario(candidate)
         return candidate
 
@@ -103,7 +121,10 @@ class ScenarioService:
             },
         }
         try:
-            outputs = self.pipeline.run(effective)
+            outputs = self.pipeline.run(
+                effective,
+                deferred_work_item_ids=frozenset(scenario.overrides.deferred_work_item_ids),
+            )
         except Exception as exc:
             failed = ScenarioRun(**common, status="FAILED",
                 error={"code": "PIPELINE_EXECUTION_FAILED", "message": str(exc)})

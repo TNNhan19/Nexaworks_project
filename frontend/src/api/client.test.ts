@@ -23,6 +23,22 @@ describe('apiRequest', () => {
     expect(error).toMatchObject({ status: 400, code: 'INVALID_SCENARIO', message: 'Override rejected', details: ['hours must be positive'] })
   })
 
+  it('shows FastAPI 422 field validation instead of only the HTTP status', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      detail: [{
+        type: 'extra_forbidden',
+        loc: ['body', 'overrides', 'deferred_work_item_ids'],
+        msg: 'Extra inputs are not permitted',
+      }],
+    }), { status: 422, statusText: 'Unprocessable Entity', headers: { 'Content-Type': 'application/json' } })))
+    const error = await apiRequest('/api/v1/scenarios').catch((value: unknown) => value)
+    expect(error).toMatchObject({
+      status: 422,
+      message: 'Request validation failed.',
+      details: ['overrides.deferred_work_item_ids: Extra inputs are not permitted'],
+    })
+  })
+
   it('normalizes network failures', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
     await expect(apiRequest('/health')).rejects.toMatchObject({ status: 0, code: 'NETWORK_ERROR' })
