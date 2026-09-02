@@ -327,9 +327,17 @@ def test_phase_2a_feasibility_with_portfolio_hours_override(canonical_dataset):
         w015, canonical_dataset
     )
 
-    # Both should use the same team capacity
+    # Hours overrides do not change the skill-eligible capacity pool.
+    eligible_capacity = sum(
+        person.capacity_hours
+        for person in canonical_dataset.people
+        if any(
+            person.skills.get(requirement.skill, 0) >= requirement.min_level
+            for requirement in w015.required_skills
+        )
+    )
     assert result_with_override.capacity.total_team_capacity_hours == \
-           result_without_override.capacity.total_team_capacity_hours == 748.0
+           result_without_override.capacity.total_team_capacity_hours == eligible_capacity
 
     # The override changes the required_hours in the capacity check
     assert result_with_override.capacity.required_hours < \

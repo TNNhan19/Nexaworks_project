@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .reason_codes import AllocationType, DecisionType, PlannerReasonCode, PlanStatus
+from .reason_codes import AllocationType, AssignmentRole, DecisionType, PlannerReasonCode, PlanStatus
 
 
 class PrerequisiteClosure(BaseModel):
@@ -38,6 +38,7 @@ class Assignment(BaseModel):
     person_id: str
     action_id: str
     assigned_hours: float = Field(ge=0)
+    assignment_role: AssignmentRole = AssignmentRole.CONTRIBUTOR
     skills_covered: list[str] = Field(default_factory=list)
     languages_covered: list[str] = Field(default_factory=list)
 

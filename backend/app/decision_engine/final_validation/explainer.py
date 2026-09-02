@@ -245,8 +245,10 @@ def build_cash_summary(
     """Build CashSummary and cash-related ExplanationRecords."""
     from .reason_codes import FinancialStatus
 
-    # Determine financial_status (worst scenario wins)
-    worst_status = FinancialStatus.CASH_SAFE
+    # Approved V1 aggregation policy:
+    # EXPECTED determines explicit NEGATIVE_CASH / BUFFER_BREACH severity;
+    # an unsafe DOWNSIDE with a safe EXPECTED maps to CASH_AT_RISK.
+    # SUCCESS remains visible evidence but does not drive aggregation.
     scenario_summaries: list[ScenarioCashSummary] = []
 
     for scenario_key in [CashScenario.EXPECTED, CashScenario.DOWNSIDE, CashScenario.SUCCESS]:
@@ -263,18 +265,24 @@ def build_cash_summary(
             days_below_buffer=s.days_below_buffer,
             negative_cash=bool(s.negative_cash_dates),
         ))
-        if s.status == ScenarioCashStatus.NEGATIVE_CASH:
-            worst_status = FinancialStatus.NEGATIVE_CASH
-        elif s.status == ScenarioCashStatus.BUFFER_BREACH and worst_status != FinancialStatus.NEGATIVE_CASH:
-            worst_status = FinancialStatus.BUFFER_BREACH
-        elif worst_status == FinancialStatus.CASH_SAFE and cash_result.overall_status.value == "CASH_AT_RISK":
-            worst_status = FinancialStatus.CASH_AT_RISK
-
-    # Cash findings
-    findings: list[ExplanationRecord] = []
     exp_s = cash_result.scenarios.get(CashScenario.EXPECTED)
     dn_s = cash_result.scenarios.get(CashScenario.DOWNSIDE)
     su_s = cash_result.scenarios.get(CashScenario.SUCCESS)
+
+    if exp_s and exp_s.status == ScenarioCashStatus.NEGATIVE_CASH:
+        financial_status = FinancialStatus.NEGATIVE_CASH
+    elif exp_s and exp_s.status == ScenarioCashStatus.BUFFER_BREACH:
+        financial_status = FinancialStatus.BUFFER_BREACH
+    elif dn_s and dn_s.status in {
+        ScenarioCashStatus.BUFFER_BREACH,
+        ScenarioCashStatus.NEGATIVE_CASH,
+    }:
+        financial_status = FinancialStatus.CASH_AT_RISK
+    else:
+        financial_status = FinancialStatus.CASH_SAFE
+
+    # Cash findings
+    findings: list[ExplanationRecord] = []
 
     if exp_s and exp_s.negative_cash_dates:
         findings.append(_rec(
@@ -334,7 +342,7 @@ def build_cash_summary(
                         expected_amount_jpy=ev.amount_jpy,
                     ))
 
-    if horizon_out_total > 0 and worst_status in {
+    if horizon_out_total > 0 and financial_status in {
         FinancialStatus.NEGATIVE_CASH, FinancialStatus.BUFFER_BREACH, FinancialStatus.CASH_AT_RISK
     }:
         in_horizon_out = (exp_s.total_cash_out_jpy if exp_s else 0)
@@ -353,7 +361,7 @@ def build_cash_summary(
     summary = CashSummary(
         starting_cash_jpy=cash_result.starting_cash_jpy,
         minimum_buffer_jpy=cash_result.minimum_buffer_jpy,
-        financial_status=worst_status,
+        financial_status=financial_status,
         scenarios=scenario_summaries,
         future_receipts=sorted(future_receipts, key=lambda f: f.date),
         findings=findings,

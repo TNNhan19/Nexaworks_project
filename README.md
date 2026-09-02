@@ -2,7 +2,7 @@
 
 Starter implementation for the four-week NexaWorks management decision challenge.
 
-## Current milestone -- Phase 2G: Final Validation + Explanation
+## Current milestone -- Phase 4: Backend API + Scenario Management
 
 ### Phase 1 (complete)
 
@@ -20,7 +20,7 @@ Starter implementation for the four-week NexaWorks management decision challenge
   - `skill_checker.py` -- TEAM_COVERAGE (levels never summed)
   - `language_checker.py` -- CUSTOMER_FACING_COVERAGE (configurable via AssumptionRegistry)
   - `dependency_checker.py` -- HARD policy; unsatisfied deps -> BLOCKED (not INFEASIBLE)
-  - `capacity_checker.py` -- TOTAL_PERSON_HOURS; full team pool, orthogonal to skill coverage
+  - `capacity_checker.py` -- TOTAL_PERSON_HOURS; only people matching at least one required skill contribute capacity
   - `resource_checker.py` -- structural hours-vs-ceiling check, exclusive flag noted
   - `deadline_checker.py` -- EXPIRED/WITHIN_HORIZON/OUTSIDE_HORIZON; SOFT_WITH_PENALTY vs HARD_OR_EXPIRY
   - `engine.py` -- orchestrator; FEASIBLE / BLOCKED / INFEASIBLE status with hard_failures / blockers / warnings
@@ -99,6 +99,25 @@ Starter implementation for the four-week NexaWorks management decision challenge
 - `docs/FINAL_VALIDATION.md` -- dimensional statuses, validation rules, provenance, no-replanning principle
 - Canonical result: `PLAN_AT_RISK` (operationally partial + financially NEGATIVE_CASH)
 
+### Phase 3 (complete) -- Reliability & Unseen-Data Testing
+
+- Synthetic same-schema factories with arbitrary people/work/resource/option/effect IDs
+- Dynamic-size coverage up to 12 people, 31 work items, 5 options per opportunity, and 4 resources/effects
+- Unseen skills and workforce languages, dependency graphs, mandatory/capacity/resource edges
+- Commercial, portfolio, scoring, planner, exact-JPY cash, and final-status reliability cases
+- Clean malformed-input/reference rejection and repeated-run determinism
+- Full arbitrary-ID unseen dataset through Phases 2A–2G
+- `docs/RELIABILITY_TESTING.md` -- strategy, coverage, production fix, and remaining limitations
+
+### Phase 4 (complete) -- Backend API + Scenario Management
+
+- Immutable baseline plus strict, structured scenario overrides
+- SQLite persistence for scenarios and immutable full-pipeline run snapshots
+- One application service composing Phases 2A–2G without duplicating business rules
+- Scenario CRUD, execution history, retrieval, and structured two-run comparison
+- Baseline/scenario isolation and deterministic A → B → A execution coverage
+- `docs/SCENARIO_API.md` -- lifecycle, override contract, persistence, errors, and limitations
+
 ## Run
 
 ```bash
@@ -127,6 +146,12 @@ Useful endpoints:
 - `GET /api/v1/plan` / `POST /api/v1/plan`
 - `POST /api/v1/cash-flow`
 - `POST /api/v1/final-decision`
+- `GET /api/v1/baseline/summary`
+- `GET /api/v1/scenarios` / `POST /api/v1/scenarios`
+- `GET /api/v1/scenarios/{id}` / `PATCH /api/v1/scenarios/{id}` / `DELETE /api/v1/scenarios/{id}`
+- `POST /api/v1/scenarios/{id}/run` / `GET /api/v1/scenarios/{id}/runs`
+- `GET /api/v1/runs/{run_id}`
+- `GET /api/v1/runs/compare?run_a_id=...&run_b_id=...`
 
 ## Test
 
@@ -135,7 +160,7 @@ cd backend
 pytest -q
 ```
 
-258 tests, 0 failures (as of Phase 2G).
+354 tests, 0 failures (as of Phase 4).
 
 ## Canonical Dataset Phase 2A Feasibility Results
 

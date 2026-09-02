@@ -150,21 +150,21 @@ class FinalValidationEngine:
             f for f in structural_findings
             if f.severity in {FindingSeverity.CRITICAL, FindingSeverity.ERROR}
         ]
-        # MANDATORY_WORK_OMITTED elevates to AT_RISK, not INFEASIBLE
-        # (the planner may not have been able to handle it, not a fundamental impossibility)
+        # A silently omitted mandatory item makes the supplied plan structurally
+        # incomplete. Unlike an explicit MANDATORY_INFEASIBLE outcome, this is
+        # a hard recheck failure because the plan does not account for the work.
         omitted_mandatory = [
             f for f in mandatory_findings
             if f.code == ExplanationCode.MANDATORY_WORK_OMITTED
         ]
         infeasible_recheck = [
             f for f in hard_recheck_failures
-            if f.code not in {ExplanationCode.MANDATORY_WORK_OMITTED,
-                               ExplanationCode.MANDATORY_WORK_INFEASIBLE}
+            if f.code != ExplanationCode.MANDATORY_WORK_INFEASIBLE
         ]
 
         if plan.status == PlanStatus.INFEASIBLE or infeasible_recheck:
             operational_status = OperationalStatus.OPERATIONALLY_INFEASIBLE
-        elif plan.mandatory_infeasible or omitted_mandatory:
+        elif plan.mandatory_infeasible:
             operational_status = OperationalStatus.OPERATIONALLY_AT_RISK
         elif plan.status == PlanStatus.PARTIAL or plan.delayed_actions or plan.no_bid_opportunities:
             operational_status = OperationalStatus.OPERATIONALLY_PARTIAL

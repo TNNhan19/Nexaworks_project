@@ -99,9 +99,9 @@ AI=3 by Person A; PM=4 by Person B  → both skills covered  ← VALID
 ### 4.4 Person Capacity — `TOTAL_PERSON_HOURS`
 
 - `required_hours` is a **shared pool** — divided across all assignees.
-- Capacity pool is the **entire team** — not restricted to skill/language-eligible people.
-- Skill coverage and hour capacity are **orthogonal** concerns.
-- If total team capacity < required_hours → hard failure (`INSUFFICIENT_PERSON_CAPACITY`).
+- Capacity pool contains only people meeting at least one required skill at its minimum level.
+- Work without required skills may use the full team.
+- If eligible capacity < required_hours → hard failure (`INSUFFICIENT_PERSON_CAPACITY`).
 
 ### 4.5 Shared Resources — Structural Check
 
@@ -167,9 +167,9 @@ Deadline status classification:
 
   "capacity": {
     "required_hours": 210.0,
-    "total_team_capacity_hours": 748.0,
+    "total_team_capacity_hours": 400.0,
     "sufficient": true,
-    "note": "Capacity pool: all people in dataset. Skill/language coverage is evaluated separately."
+    "note": "Capacity pool: people satisfying at least one required skill."
   },
 
   "resources": [
@@ -321,7 +321,7 @@ backend/app/decision_engine/feasibility/
 ├── skill_checker.py     # TEAM_COVERAGE implementation
 ├── language_checker.py  # CUSTOMER_FACING_COVERAGE implementation
 ├── dependency_checker.py # HARD policy, BLOCKED distinction
-├── capacity_checker.py  # TOTAL_PERSON_HOURS, full team pool
+├── capacity_checker.py  # TOTAL_PERSON_HOURS, skill-eligible pool
 ├── resource_checker.py  # Structural hours-vs-ceiling check
 └── deadline_checker.py  # EXPIRED/WITHIN_HORIZON/OUTSIDE_HORIZON classification
 ```

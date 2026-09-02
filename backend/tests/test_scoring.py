@@ -275,7 +275,8 @@ def test_canonical_w007_b_locked_regardless_of_score(canonical_scoring) -> None:
 
 def test_canonical_w006_blocked_and_w011_c_is_ordinary(canonical_scoring) -> None:
     _, result = canonical_scoring
-    assert all(result.get_candidate(f"W006-{suffix}").selection_status == SelectionStatus.BLOCKED for suffix in "ABC")
+    assert all(result.get_candidate(f"W006-{suffix}").selection_status == SelectionStatus.BLOCKED for suffix in "AB")
+    assert result.get_candidate("W006-C").selection_status == SelectionStatus.INFEASIBLE
     w011c = result.get_candidate("W011-C")
     assert w011c.action_type == ActionType.SELECT_OPTION
     assert w011c.selection_status == SelectionStatus.ELIGIBLE

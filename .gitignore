@@ -4,6 +4,10 @@ __pycache__/
 .venv/
 .env
 *.db
+*.sqlite
+*.sqlite3
 .DS_Store
 node_modules/
 dist/
+coverage/
+*.log

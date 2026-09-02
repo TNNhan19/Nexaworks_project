@@ -9,10 +9,10 @@ from .models import (
     ScheduleEntry,
 )
 from .prerequisites import PrerequisiteResolver
-from .reason_codes import AllocationType, DecisionType, PlannerReasonCode, PlanStatus
+from .reason_codes import AllocationType, AssignmentRole, DecisionType, PlannerReasonCode, PlanStatus
 
 __all__ = [
     "PlannerEngine", "PlanResult", "PlanDecision", "Assignment", "ScheduleEntry",
     "ResourceScheduleEntry", "PrerequisiteClosure", "PrerequisiteResolver",
-    "AllocationType", "DecisionType", "PlannerReasonCode", "PlanStatus",
+    "AllocationType", "AssignmentRole", "DecisionType", "PlannerReasonCode", "PlanStatus",
 ]

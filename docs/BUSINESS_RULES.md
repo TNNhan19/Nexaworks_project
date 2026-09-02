@@ -17,8 +17,9 @@ This document separates rules supported directly by the supplied material from e
 | Topic | Policy | Interpretation |
 |---|---|---|
 | Work effort | `TOTAL_PERSON_HOURS` | `required_hours` is a shared person-hour pool across assigned people. |
-| Skill coverage | `TEAM_COVERAGE` | Different requirements may be covered by different assigned people; a single skill level is never summed. |
-| Language | `CUSTOMER_FACING_COVERAGE` | Required language is covered at the customer-facing / coordination level, not necessarily by every technical contributor. |
+| Contributor eligibility | `AT_LEAST_ONE_REQUIRED_SKILL` | Every assignee must meet at least one required skill at its minimum level; work without required skills may use the full team. |
+| Skill coverage | `TEAM_COVERAGE` | The assigned team must collectively cover every requirement; different people may cover different skills and levels are never summed. |
+| Owner | `QUALIFIED_OWNER` | One owner must meet at least one required skill, cover all mandatory languages, and is chosen to maximize required-skill coverage with deterministic capacity/ID tie-breaks. |
 | Sales capacity | `FULL_IF_COMMITTED` | A chosen/accepted option must be deliverable at full `delivery_hours`; pending opportunities are shown separately as pipeline sensitivity. |
 | Dependencies | `HARD` | Dependency order cannot be violated. |
 | Contract/internal deadline | `SOFT_WITH_PENALTY` | Late completion may be scheduled but must show late days, penalty and at-risk status. |
@@ -73,9 +74,9 @@ Three-way classification with explicit boundary conditions:
 
 ### Capacity check pool
 
-For the `TOTAL_PERSON_HOURS` check, the pool is the **entire team**, not just skill-eligible people.
+For the `TOTAL_PERSON_HOURS` check, capacity comes only from people who satisfy at least one required skill at its minimum level. Work without skill requirements may use the full team.
 
-Rationale: a person contributes labour hours to a work item even if someone else covers the required skill threshold.  Restricting the pool would produce false INFEASIBLE results.
+The assigned group must collectively cover every required skill. One qualified owner must cover all mandatory languages and at least one required skill. If qualified capacity is insufficient, mandatory work is reported infeasible, optional work is deferred, and a commercial opportunity is rejected.
 
 ### Language coverage configurability
 
@@ -200,14 +201,16 @@ If a violation is detected, it is returned as an `ExplanationRecord` with the ap
 ### Status propagation rules (explicit)
 
 1. `OPERATIONALLY_INFEASIBLE` → `PLAN_INFEASIBLE` (hard failure dominates).
-2. Any scenario reaches `NEGATIVE_CASH` → at least `PLAN_AT_RISK`.
-3. Any scenario reaches `BUFFER_BREACH` → at least `PLAN_AT_RISK`.
-4. `OPERATIONALLY_AT_RISK` (mandatory infeasible or omitted) → `PLAN_AT_RISK`.
-5. `CASH_AT_RISK` (from Phase 2F overall status) → `PLAN_AT_RISK`.
-6. `OPERATIONALLY_PARTIAL` + `CASH_SAFE` → `PLAN_PARTIAL`.
-7. `OPERATIONALLY_FEASIBLE` + `CASH_SAFE` → `PLAN_FEASIBLE`.
+2. EXPECTED reaches `NEGATIVE_CASH` → `FinancialStatus.NEGATIVE_CASH` → at least `PLAN_AT_RISK`.
+3. EXPECTED reaches `BUFFER_BREACH` → `FinancialStatus.BUFFER_BREACH` → at least `PLAN_AT_RISK`.
+4. EXPECTED is safe but DOWNSIDE is unsafe → `FinancialStatus.CASH_AT_RISK` → at least `PLAN_AT_RISK`.
+5. `OPERATIONALLY_AT_RISK` (mandatory explicitly infeasible) → `PLAN_AT_RISK`.
+6. A silently omitted mandatory item → `OPERATIONALLY_INFEASIBLE` → `PLAN_INFEASIBLE`.
+7. `CASH_AT_RISK` → `PLAN_AT_RISK`.
+8. `OPERATIONALLY_PARTIAL` + `CASH_SAFE` → `PLAN_PARTIAL`.
+9. `OPERATIONALLY_FEASIBLE` + `CASH_SAFE` → `PLAN_FEASIBLE`.
 
-Financial severity order (worst wins): `NEGATIVE_CASH` > `BUFFER_BREACH` > `CASH_AT_RISK` > `CASH_SAFE`.
+SUCCESS remains supporting evidence and does not drive aggregate financial status.
 
 ### Explanation provenance
 

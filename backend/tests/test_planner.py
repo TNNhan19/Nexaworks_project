@@ -8,6 +8,7 @@ import pytest
 
 from app.decision_engine.planner import (
     AllocationType,
+    AssignmentRole,
     DecisionType,
     PlannerEngine,
     PlannerReasonCode,
@@ -229,6 +230,86 @@ def test_20_language_coverage():
     item = work("W", languages=["ja"])
     result = PlannerEngine().plan(dataset([item], people=[person(languages=["en"])]))
     assert "W" not in result.selected_actions
+
+
+def test_skill_policy_applies_to_every_assignee_and_owner(canonical, canonical_plan):
+    work_map = {item.id: item for item in canonical.work_items}
+    decision_work = {
+        decision.action_id: work_map[decision.work_item_id]
+        for decision in canonical_plan.decisions
+        if decision.decision in {
+            DecisionType.DO,
+            DecisionType.ENABLING_PREREQUISITE,
+            DecisionType.SELECT_OPTION,
+        }
+    }
+    people = {person.id: person for person in canonical.people}
+
+    for assignment in canonical_plan.assignments:
+        item = decision_work[assignment.action_id]
+        person_item = people[assignment.person_id]
+        if item.required_skills:
+            assert any(
+                person_item.skills.get(req.skill, 0) >= req.min_level
+                for req in item.required_skills
+            )
+
+    for action_id, item in decision_work.items():
+        owners = [
+            assignment for assignment in canonical_plan.assignments
+            if assignment.action_id == action_id
+            and assignment.assignment_role == AssignmentRole.OWNER
+        ]
+        assert len(owners) == 1
+        owner = people[owners[0].person_id]
+        assert all(language in owner.languages for language in item.required_languages)
+        if item.required_skills:
+            assert any(
+                owner.skills.get(req.skill, 0) >= req.min_level
+                for req in item.required_skills
+            )
+
+
+def test_w021_collection_is_owned_by_qualified_business_person(canonical, canonical_plan):
+    people = {person.id: person for person in canonical.people}
+    item = next(work_item for work_item in canonical.work_items if work_item.id == "W021")
+    assignments = [
+        assignment for assignment in canonical_plan.assignments
+        if assignment.action_id == "W021"
+    ]
+
+    assert assignments
+    assert all(
+        any(
+            people[assignment.person_id].skills.get(req.skill, 0) >= req.min_level
+            for req in item.required_skills
+        )
+        for assignment in assignments
+    )
+    owner = next(
+        assignment for assignment in assignments
+        if assignment.assignment_role == AssignmentRole.OWNER
+    )
+    assert all(language in people[owner.person_id].languages for language in item.required_languages)
+    assert set(owner.skills_covered) == {"sales", "project_management"}
+
+
+def test_insufficient_qualified_capacity_maps_to_business_decision():
+    qualified = person("Q", capacity=2, skills={"robotics": 5})
+    unqualified = person("U", capacity=100, skills={"general": 5})
+    requirement = [SkillRequirement(skill="robotics", min_level=4)]
+    mandatory = work("M", hours=5, mandatory=True, skills=requirement)
+    optional = work("O", hours=5, skills=requirement)
+    opportunity = work("C", hours=1, wtype="sales_opportunity", skills=requirement)
+    result = PlannerEngine().plan(dataset(
+        [mandatory, optional, opportunity],
+        people=[qualified, unqualified],
+        options=[option("C", "C-A", delivery=5)],
+    ))
+
+    assert result.get_decision("M").decision == DecisionType.MANDATORY_INFEASIBLE
+    assert result.get_decision("O").decision == DecisionType.DELAY
+    assert result.get_decision("C").decision == DecisionType.NO_BID
 
 
 def test_21_person_total_capacity():

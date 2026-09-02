@@ -478,10 +478,11 @@ def test_36_canonical_w021_cash_scenarios(canonical):
     assert event_total(result, "DOWNSIDE", CashEventType.PORTFOLIO_CASH_INFLOW) == 0
 
 
-def test_37_canonical_w012a_selected_option_cash(canonical):
-    _, _, result = canonical
+def test_37_canonical_w012_rejected_when_qualified_capacity_cannot_meet_expiry(canonical):
+    _, plan, result = canonical
     future = [e for e in result.get_scenario("EXPECTED").future_events if e.source_id == "W012-A"]
-    assert len(future) == 1 and future[0].amount_jpy == 5_400_000
+    assert future == []
+    assert "W012" in plan.no_bid_opportunities
 
 
 def test_38_canonical_fixed_outflow(canonical):
@@ -497,7 +498,7 @@ def test_39_canonical_four_week_ledger(canonical):
 def test_40_canonical_plan_not_replanned(canonical):
     _, plan, result = canonical
     assert result.operational_plan_status == plan.status.value
-    assert "W012-A" in plan.selected_actions
+    assert "W012" in plan.no_bid_opportunities
 
 
 def test_41_cash_flow_api():

@@ -44,6 +44,7 @@ class ScheduleAttempt:
     details: dict = field(default_factory=dict)
     witness_skills: dict[str, list[str]] = field(default_factory=dict)
     witness_languages: dict[str, list[str]] = field(default_factory=dict)
+    owner_id: str | None = None
 
 
 class DayScheduler:
@@ -113,65 +114,99 @@ class DayScheduler:
     def _available_hours(self, person_id: str, dates: list[date]) -> float:
         return sum(self._remaining(person_id, day) for day in dates)
 
+    def _eligible_contributors(self, work_item: WorkItem) -> list[str]:
+        """People may contribute only when they satisfy at least one required skill."""
+        if not work_item.required_skills:
+            return sorted(self.people)
+        return sorted(
+            person.id for person in self.dataset.people
+            if any(
+                person.skills.get(req.skill, 0) >= req.min_level
+                for req in work_item.required_skills
+            )
+        )
+
     def _coverage_witnesses(
         self,
         work_item: WorkItem,
         dates: list[date],
-    ) -> tuple[list[str], dict[str, list[str]], dict[str, list[str]], PlannerReasonCode | None, dict]:
+        eligible_contributors: list[str],
+    ) -> tuple[str | None, list[str], dict[str, list[str]], dict[str, list[str]], PlannerReasonCode | None, dict]:
         chosen: list[str] = []
         skills: dict[str, list[str]] = {}
         languages: dict[str, list[str]] = {}
 
-        def choose(eligible: list[str]) -> str | None:
-            candidates = [pid for pid in eligible if self._available_hours(pid, dates) > _EPS]
-            if not candidates:
-                return None
-            return sorted(candidates, key=lambda pid: (-self._available_hours(pid, dates), pid))[0]
+        def available(person_id: str) -> bool:
+            return self._available_hours(person_id, dates) > _EPS
+
+        def skill_count(person_id: str) -> int:
+            person = self.people[person_id]
+            return sum(
+                person.skills.get(req.skill, 0) >= req.min_level
+                for req in work_item.required_skills
+            )
+
+        # The owner must be able to execute the work and cover every mandatory
+        # language. Prefer the person covering the most requested skills, then
+        # the one with the most available capacity, with ID as deterministic tie-break.
+        owner_candidates: list[str] = []
+        for person_id in eligible_contributors:
+            person = self.people[person_id]
+            if not all(language in person.languages for language in work_item.required_languages):
+                continue
+            proxy = self.assumptions.language_customer_facing_skill
+            if proxy is not None and work_item.required_languages:
+                if person.skills.get(proxy, 0) < self.assumptions.language_customer_facing_min_level:
+                    continue
+            if available(person_id):
+                owner_candidates.append(person_id)
+
+        if not owner_candidates:
+            code = (
+                PlannerReasonCode.MISSING_LANGUAGE_COVERAGE
+                if work_item.required_languages
+                else PlannerReasonCode.DELAYED_CAPACITY_LIMIT
+            )
+            return None, [], {}, {}, code, {
+                "required_languages": work_item.required_languages,
+                "eligible_contributors": eligible_contributors,
+                "owner_requirement": "execution_skill_and_all_required_languages",
+            }
+
+        owner_id = sorted(
+            owner_candidates,
+            key=lambda pid: (-skill_count(pid), -self._available_hours(pid, dates), pid),
+        )[0]
+        chosen.append(owner_id)
+        if work_item.required_languages:
+            languages[owner_id] = list(work_item.required_languages)
 
         for req in work_item.required_skills:
             eligible = [
-                person.id for person in self.dataset.people
-                if person.skills.get(req.skill, 0) >= req.min_level
+                person_id for person_id in eligible_contributors
+                if self.people[person_id].skills.get(req.skill, 0) >= req.min_level
             ]
             if not eligible:
-                return [], {}, {}, PlannerReasonCode.MISSING_SKILL_COVERAGE, {
-                    "skill": req.skill, "required_level": req.min_level,
+                return None, [], {}, {}, PlannerReasonCode.MISSING_SKILL_COVERAGE, {
+                    "skill": req.skill,
+                    "required_level": req.min_level,
                 }
-            witness = choose(eligible)
-            if witness is None:
-                return [], {}, {}, PlannerReasonCode.DELAYED_CAPACITY_LIMIT, {
-                    "skill": req.skill, "required_level": req.min_level,
+            candidates = [person_id for person_id in eligible if available(person_id)]
+            if not candidates:
+                return None, [], {}, {}, PlannerReasonCode.DELAYED_CAPACITY_LIMIT, {
+                    "skill": req.skill,
+                    "required_level": req.min_level,
                     "eligible_people": eligible,
                 }
+            witness = (
+                owner_id if owner_id in candidates
+                else sorted(candidates, key=lambda pid: (-self._available_hours(pid, dates), pid))[0]
+            )
             skills.setdefault(witness, []).append(req.skill)
             if witness not in chosen:
                 chosen.append(witness)
 
-        for language in work_item.required_languages:
-            eligible: list[str] = []
-            for person in self.dataset.people:
-                if language not in person.languages:
-                    continue
-                proxy = self.assumptions.language_customer_facing_skill
-                if proxy is not None and person.skills.get(proxy, 0) < self.assumptions.language_customer_facing_min_level:
-                    continue
-                eligible.append(person.id)
-            witness = choose(eligible)
-            if not eligible:
-                return [], {}, {}, PlannerReasonCode.MISSING_LANGUAGE_COVERAGE, {
-                    "language": language,
-                    "policy": self.assumptions.language_coverage_policy,
-                }
-            if witness is None:
-                return [], {}, {}, PlannerReasonCode.DELAYED_CAPACITY_LIMIT, {
-                    "language": language,
-                    "policy": self.assumptions.language_coverage_policy,
-                    "eligible_people": eligible,
-                }
-            languages.setdefault(witness, []).append(language)
-            if witness not in chosen:
-                chosen.append(witness)
-        return chosen, skills, languages, None, {}
+        return owner_id, chosen, skills, languages, None, {}
 
     def _allocate_person_hours(
         self,
@@ -180,17 +215,17 @@ class DayScheduler:
         dates: list[date],
         allocation_type: AllocationType,
         witnesses: list[str],
+        eligible_people: list[str],
     ) -> list[ScheduleEntry] | None:
         if hours <= _EPS:
             return []
-        if sum(self._available_hours(pid, dates) for pid in self.people) + _EPS < hours:
+        if sum(self._available_hours(pid, dates) for pid in eligible_people) + _EPS < hours:
             return None
         entries: list[ScheduleEntry] = []
         remaining = hours
 
-        # Give each coverage witness a real positive allocation on its earliest
-        # available day. Coverage does not imply an invented minimum number of
-        # specialist hours, so the remainder is then shared across the team.
+        # Give every coverage witness a positive allocation, then allocate the
+        # remainder only among people who satisfy at least one required skill.
         remaining_witnesses = len(witnesses)
         for person_id in witnesses:
             assigned = 0.0
@@ -203,8 +238,11 @@ class DayScheduler:
                     self.state.person_daily_used[person_id][day] += amount
                     self.state.person_total_used[person_id] += amount
                     entries.append(ScheduleEntry(
-                        date=day, action_id=action_id, person_id=person_id,
-                        hours=round(amount, 10), allocation_type=allocation_type,
+                        date=day,
+                        action_id=action_id,
+                        person_id=person_id,
+                        hours=round(amount, 10),
+                        allocation_type=allocation_type,
                     ))
                     assigned += amount
                     remaining -= amount
@@ -214,7 +252,7 @@ class DayScheduler:
             remaining_witnesses -= 1
 
         for day in dates:
-            for person_id in sorted(self.people):
+            for person_id in eligible_people:
                 if remaining <= _EPS:
                     break
                 amount = min(remaining, self._remaining(person_id, day))
@@ -223,8 +261,11 @@ class DayScheduler:
                 self.state.person_daily_used[person_id][day] += amount
                 self.state.person_total_used[person_id] += amount
                 entries.append(ScheduleEntry(
-                    date=day, action_id=action_id, person_id=person_id,
-                    hours=round(amount, 10), allocation_type=allocation_type,
+                    date=day,
+                    action_id=action_id,
+                    person_id=person_id,
+                    hours=round(amount, 10),
+                    allocation_type=allocation_type,
                 ))
                 remaining -= amount
             if remaining <= _EPS:
@@ -295,16 +336,20 @@ class DayScheduler:
         if hours > _EPS and not dates:
             return ScheduleAttempt(False, reason_code=PlannerReasonCode.DELAYED_CAPACITY_LIMIT)
 
+        eligible_people = self._eligible_contributors(work_item)
         witnesses: list[str] = []
+        owner_id: str | None = None
         skill_map: dict[str, list[str]] = {}
         language_map: dict[str, list[str]] = {}
         if require_coverage and hours > _EPS:
-            witnesses, skill_map, language_map, failure, details = self._coverage_witnesses(work_item, dates)
+            owner_id, witnesses, skill_map, language_map, failure, details = self._coverage_witnesses(
+                work_item, dates, eligible_people,
+            )
             if failure is not None:
                 return ScheduleAttempt(False, reason_code=failure, details=details)
 
         entries = self._allocate_person_hours(
-            action_id, hours, dates, allocation_type, witnesses,
+            action_id, hours, dates, allocation_type, witnesses, eligible_people,
         )
         if entries is None:
             self.restore(checkpoint)
@@ -320,4 +365,5 @@ class DayScheduler:
             completion_date=max(active_dates) if active_dates else earliest,
             witness_skills=skill_map,
             witness_languages=language_map,
+            owner_id=owner_id,
         )

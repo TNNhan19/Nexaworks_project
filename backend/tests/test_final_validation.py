@@ -430,6 +430,66 @@ def test_07_language_coverage_violation_detected():
     assert any(f.code == ExplanationCode.LANGUAGE_COVERAGE_VIOLATION for f in findings)
 
 
+def test_07b_owner_language_alone_is_not_execution_qualification():
+    """An owner must cover language and at least one required work skill."""
+    from app.decision_engine.final_validation.validators import (
+        validate_language_coverage,
+        validate_skill_coverage,
+    )
+    from app.decision_engine.planner import AssignmentRole
+    from app.decision_engine.planner.models import Assignment, PlanDecision, PlanResult
+
+    owner = _person("OWNER", 40, skills={"sales": 2}, langs=["ja"])
+    specialist = _person("SPECIALIST", 40, skills={"sales": 5}, langs=["en"])
+    item = _work(
+        "COLLECT",
+        20,
+        skills=[SkillRequirement(skill="sales", min_level=4)],
+        langs=["ja"],
+    )
+    data = _dataset([owner, specialist], [item])
+    plan = PlanResult(
+        status=PlanStatus.FEASIBLE,
+        decisions=[PlanDecision(
+            work_item_id="COLLECT",
+            action_id="COLLECT",
+            decision=DecisionType.DO,
+        )],
+        assignments=[
+            Assignment(
+                person_id="OWNER",
+                action_id="COLLECT",
+                assigned_hours=5,
+                assignment_role=AssignmentRole.OWNER,
+            ),
+            Assignment(
+                person_id="SPECIALIST",
+                action_id="COLLECT",
+                assigned_hours=15,
+                assignment_role=AssignmentRole.CONTRIBUTOR,
+            ),
+        ],
+        selected_actions=["COLLECT"],
+        delayed_actions=[],
+        no_bid_opportunities=[],
+        mandatory_infeasible=[],
+        person_capacity=[],
+        resource_capacity=[],
+    )
+
+    skill_findings = validate_skill_coverage(data, plan)
+    language_findings = validate_language_coverage(data, plan)
+    assert any(
+        finding.evidence.get("violation_type") == "UNQUALIFIED_ASSIGNEE"
+        and finding.evidence.get("person_id") == "OWNER"
+        for finding in skill_findings
+    )
+    assert any(
+        finding.evidence.get("violation_type") == "MISSING_QUALIFIED_OWNER"
+        for finding in language_findings
+    )
+
+
 # ===========================================================================
 # Test 08: person capacity violation detected
 # ===========================================================================
