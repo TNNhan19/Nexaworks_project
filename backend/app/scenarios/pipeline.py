@@ -25,11 +25,11 @@ class DecisionPipelineService:
     def __init__(self, assumptions: AssumptionRegistry = DEFAULT_ASSUMPTIONS):
         self.assumptions = assumptions
 
-    def run(
+    def _analysis_models(
         self,
         dataset: CandidateDataset,
-        completed_work_item_ids: frozenset[str] = frozenset(),
-    ) -> dict[str, Any]:
+        completed_work_item_ids: frozenset[str],
+    ) -> tuple[Any, Any, Any, Any]:
         context = PortfolioEvaluationContext(
             completed_work_item_ids=completed_work_item_ids,
             planning_date=dataset.metadata.planning_start,
@@ -58,10 +58,41 @@ class DecisionPipelineService:
             feasibility_results=feasibility,
             completed_ids=completed_work_item_ids,
         )
+        return feasibility, portfolio, commercial, scoring
+
+    def analyze(
+        self,
+        dataset: CandidateDataset,
+        completed_work_item_ids: frozenset[str] = frozenset(),
+    ) -> dict[str, Any]:
+        """Run only the pre-planning analysis stages.
+
+        No planner, schedule, cash simulation, or final validation is executed.
+        """
+        feasibility, portfolio, commercial, scoring = self._analysis_models(
+            dataset, completed_work_item_ids
+        )
+        return {
+            "feasibility": _json(feasibility),
+            "portfolio": _json(portfolio),
+            "commercial": _json(commercial),
+            "scoring": _json(scoring),
+        }
+
+    def run(
+        self,
+        dataset: CandidateDataset,
+        completed_work_item_ids: frozenset[str] = frozenset(),
+        deferred_work_item_ids: frozenset[str] = frozenset(),
+    ) -> dict[str, Any]:
+        feasibility, portfolio, commercial, scoring = self._analysis_models(
+            dataset, completed_work_item_ids
+        )
         plan = PlannerEngine(self.assumptions).plan(
             dataset,
             completed_work_item_ids=completed_work_item_ids,
             scoring_reference=scoring.normalization_reference,
+            deferred_work_item_ids=deferred_work_item_ids,
         )
         cash_flow = CashFlowSimulator(self.assumptions).simulate(dataset, plan)
         final_decision = FinalValidationEngine(self.assumptions).validate(

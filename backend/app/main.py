@@ -9,9 +9,11 @@ from app.api.commercial import router as commercial_router
 from app.api.portfolio import router as portfolio_router
 from app.api.scoring import router as scoring_router
 from app.api.planner import router as planner_router
+from app.api.planning import router as planning_router
 from app.api.cash_flow import router as cash_flow_router
 from app.api.final_validation import router as final_validation_router
 from app.api.scenarios import router as scenarios_router
+from app.api.workforce import router as workforce_router
 from app.decision_engine.assumptions import DEFAULT_ASSUMPTIONS
 from app.services.baseline_summary import summary_as_dict
 from app.services.dataset_loader import DatasetValidationError, load_dataset
@@ -27,9 +29,11 @@ app.include_router(portfolio_router)
 app.include_router(commercial_router)
 app.include_router(scoring_router)
 app.include_router(planner_router)
+app.include_router(planning_router)
 app.include_router(cash_flow_router)
 app.include_router(final_validation_router)
 app.include_router(scenarios_router)
+app.include_router(workforce_router)
 
 
 @app.get("/health")
