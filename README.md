@@ -1,225 +1,209 @@
 # NexaWorks Decision Support System
 
-Starter implementation for the four-week NexaWorks management decision challenge.
+A comprehensive enterprise decision support and operational planning system, combining an in-depth algorithmic analytics engine (Python) with an intuitive, multilingual user interface (React + TypeScript).
 
-## Current milestone -- Phase 4: Backend API + Scenario Management
+---
 
-### Phase 1 (complete)
+## 1. Problem Overview
 
-- Canonical JSON + JSON Schema included under `data/`
-- Flexible Pydantic domain models (unknown fields preserved)
-- JSON Schema validation + semantic reference validation
-- Central Assumption Registry containing all V1 policies
-- Baseline summary service
-- Minimal FastAPI endpoints
-- Unit tests against the canonical dataset
+The system addresses the challenge of operational management and resource optimization for an enterprise within a 4-week planning horizon (from **October 5, 2026** to **October 30, 2026**), under strict resource and financial constraints:
 
-### Phase 2A (complete) -- Feasibility Engine
+- **Work Demand Exceeding Capacity**: Total workload demand is 1,277 hours, while the total capacity of the 6-person team is only 748 hours (actual demand reaches 171% of available capacity).
+- **Strict Skill and Language Constraints**: Each work item requires specific technical skill sets at minimum proficiency levels and client communication language standards (Japanese, English). Skill levels represent individual competency and cannot be mechanically aggregated across multiple team members.
+- **Dependencies and Shared Resources**: Multiple work items require prerequisite tasks to be completed first. Additionally, certain exclusive equipment/resources can only be utilized by at most one work item per day.
+- **Trade-offs Between Mandatory Commitments and Commercial Opportunities**: The system must balance fulfilling mandatory contract/safety commitments against pursuing commercial bids with win probabilities and potential revenue.
+- **Cash Flow Timing Mismatch Risk**: Managing initial cash balance and daily fixed operational burn, while identifying short-term cash deficit risks during the 4-week horizon caused by major contract revenue inflows arriving at later dates.
 
-- `backend/app/decision_engine/feasibility/` -- pure Python engine, no FastAPI dependency
-  - `skill_checker.py` -- TEAM_COVERAGE (levels never summed)
-  - `language_checker.py` -- CUSTOMER_FACING_COVERAGE (configurable via AssumptionRegistry)
-  - `dependency_checker.py` -- HARD policy; unsatisfied deps -> BLOCKED (not INFEASIBLE)
-  - `capacity_checker.py` -- TOTAL_PERSON_HOURS; only people matching at least one required skill contribute capacity
-  - `resource_checker.py` -- structural hours-vs-ceiling check, exclusive flag noted
-  - `deadline_checker.py` -- EXPIRED/WITHIN_HORIZON/OUTSIDE_HORIZON; SOFT_WITH_PENALTY vs HARD_OR_EXPIRY
-  - `engine.py` -- orchestrator; FEASIBLE / BLOCKED / INFEASIBLE status with hard_failures / blockers / warnings
-- API endpoints: `GET /api/v1/feasibility` and `GET /api/v1/feasibility/{work_item_id}`
-- 45 automated tests (all passing)
-- `docs/FEASIBILITY_ENGINE.md` -- full engine documentation
+---
 
-### Phase 2B (complete) -- Portfolio Effects Engine
+## 2. What the System Does
 
-- `backend/app/decision_engine/portfolio/` -- pure Python engine, no FastAPI dependency
-  - `context.py` -- PortfolioEvaluationContext (immutable, deterministic)
-  - `reason_codes.py` -- PortfolioEffectCode enum (no localized strings)
-  - `models.py` -- PortfolioEffectsResult, DerivedWorkItemState, CashEffect, etc.
-  - `engine.py` -- PortfolioEffectsEngine orchestrator; generic dispatch on effect.type
-  - `handlers/quality_prerequisite.py` -- qualitative risk flag only; no hard dependency created
-  - `handlers/hours_reduction.py` -- deterministic; always derived from base hours (idempotent)
-  - `handlers/future_hours_reduction.py` -- probabilistic; success/downside both preserved
-  - `handlers/commercial_option_unlock.py` -- HARD availability gate; no ranking/selection
-  - `handlers/cash_inflow.py` -- probabilistic; expected/success/downside all separated
-- API endpoint: `GET /api/v1/portfolio`
-- 39 new automated tests (84 total, all passing)
-- `docs/PORTFOLIO_EFFECTS.md` -- full engine documentation
-- Feasibility Engine updated: optional `effective_hours_override` parameter (backward compatible)
+NexaWorks serves as an intelligent assistant that empowers executive leadership to analyze, automatically optimize scheduling, and control operational risks:
 
-### Phase 2C (complete) -- Commercial Evaluation
+- **Feasibility Assessment**: Automatically evaluates each work item against staff capacity, skill coverage, language proficiency, dependency chains, shared resources, and deadlines.
+- **Portfolio Effects Analysis**: Assesses synergistic impacts between work items (e.g., completing an enablement task reduces hours required for subsequent tasks, unlocks new bid opportunities, or yields bonus cash flow).
+- **Scoring and Prioritization**: Quantifies the contribution value of each action on an objective 0–100 scale using empirical distribution normalization.
+- **Automated Operational Planning**: Generates day-by-day schedules for each employee, ensuring 100% completion of mandatory tasks, maximizing high-value work, and making automated `NO_BID` decisions on unviable opportunities.
+- **Multi-Scenario Cash Flow Simulation**: Projects daily JPY cash ledgers across 3 scenarios (Expected, Pessimistic, Optimistic), pinpointing the exact days when cash reserves breach safety buffer thresholds.
+- **Transparent Decision Explainability**: Explicitly details the reasoning and rationale behind every decision (why selected, why deferred, why no-bid) along with core risk warnings.
+- **Scenario Management & Comparison**: Allows users to dynamically modify assumptions (capital, capacity, timeline, win probabilities) and visually compare trade-offs across different scenario runs.
 
-- `backend/app/decision_engine/commercial/` -- deterministic option facts and validation
-- Phase 2B option availability and Phase 2A deliverability/deadline semantics are composed, not duplicated
-- Gross margin, expected value, follow-on value, full committed hours, and cash timing facts remain separate
-- Canonical commercial options only; no inferred/synthetic `NO_BID`, score, ranking, recommendation, or planner
-- API endpoints: `GET /api/v1/commercial` and `GET /api/v1/commercial/{work_item_id}`
-- `docs/COMMERCIAL_EVALUATION.md` -- Phase 2C contract and limitations
+---
 
-### Phase 2D (complete) -- Value / Priority Scoring
+## 3. Processing Pipeline
 
-- `backend/app/decision_engine/scoring/` -- deterministic 0–100 business-value scoring
-- Explicit BALANCED V1 weights with validation and visible contribution traces
-- Reusable empirical-CDF `ScoringReference` for scenario-comparable normalization
-- N/A-aware effective-weight renormalization
-- Eligibility remains separate from score; locks/blockers/infeasibility are never penalties
-- Canonical `DO_WORK_ITEM` / `SELECT_OPTION` actions only; no synthetic NO_BID
-- API endpoints: `GET /api/v1/scoring` and `GET /api/v1/scoring/{action_id}`
-- `docs/SCORING.md` -- formulas, sources, reference, and limitations
-
-### Phase 2E (complete) -- Heuristic Planner
-
-- Transitive dependency/unlock closure with cycle detection and dynamic completion context
-- Mandatory-first, score-ordered deterministic selection with transactional rollback
-- Canonical option exclusivity and planner-level `NO_BID`; no label/value inference
-- TEAM_COVERAGE assignment, even daily capacity, unavailable dates, and day scheduling
-- Full commercial delivery hours represented as reserved capacity
-- Exclusive shared-resource day scheduling and horizon-capacity enforcement
-- API endpoints: `GET /api/v1/plan` and `POST /api/v1/plan`
-- `docs/PLANNER.md` -- heuristic, assumptions, result contract, and limitations
-
-### Phase 2F (complete) -- Cash-Flow Simulator
-
-- Independent EXPECTED, DOWNSIDE, and SUCCESS daily cash ledgers
-- Exact integer-JPY proration and reconciliation
-- Fixed outflow, work costs/receipts, selected-option conditional cash, and E005
-- Outside-horizon future events separated from current cash
-- Minimum-buffer and negative-cash detection with structured evidence
-- API endpoint: POST /api/v1/cash-flow
-- docs/CASH_FLOW.md -- event timing, scenario rules, assumptions, and limitations
-
-### Phase 2G (complete) -- Final Validation + Explanation
-
-- `backend/app/decision_engine/final_validation/` -- pure Python engine, no FastAPI dependency
-  - `reason_codes.py` -- OperationalStatus, FinancialStatus, OverallStatus, ExplanationCode, SourcePhase
-  - `models.py` -- FinalDecisionResult, ExplanationRecord, DecisionExplanation, MandatorySummary, etc.
-  - `validators.py` -- read-only structural validation functions; never mutate upstream results
-  - `explainer.py` -- per-decision explanation builder; CashSummary builder; CASH_TIMING_MISMATCH detection
-  - `engine.py` -- FinalValidationEngine.validate() orchestrator; status propagation rules
-- API endpoint: `POST /api/v1/final-decision`
-- 258 total automated tests (all passing), including 39 Phase 2G tests
-- `docs/FINAL_VALIDATION.md` -- dimensional statuses, validation rules, provenance, no-replanning principle
-- Canonical result: `PLAN_AT_RISK` (operationally partial + financially NEGATIVE_CASH)
-
-### Phase 3 (complete) -- Reliability & Unseen-Data Testing
-
-- Synthetic same-schema factories with arbitrary people/work/resource/option/effect IDs
-- Dynamic-size coverage up to 12 people, 31 work items, 5 options per opportunity, and 4 resources/effects
-- Unseen skills and workforce languages, dependency graphs, mandatory/capacity/resource edges
-- Commercial, portfolio, scoring, planner, exact-JPY cash, and final-status reliability cases
-- Clean malformed-input/reference rejection and repeated-run determinism
-- Full arbitrary-ID unseen dataset through Phases 2A–2G
-- `docs/RELIABILITY_TESTING.md` -- strategy, coverage, production fix, and remaining limitations
-
-### Phase 4 (complete) -- Backend API + Scenario Management
-
-- Immutable baseline plus strict, structured scenario overrides
-- SQLite persistence for scenarios and immutable full-pipeline run snapshots
-- One application service composing Phases 2A–2G without duplicating business rules
-- Scenario CRUD, execution history, retrieval, and structured two-run comparison
-- Baseline/scenario isolation and deterministic A → B → A execution coverage
-- `docs/SCENARIO_API.md` -- lifecycle, override contract, persistence, errors, and limitations
-
-## Run
-
-```bash
-cd backend
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-
-Open API docs at `http://127.0.0.1:8000/docs`.
-
-Useful endpoints:
-
-- `GET /health`
-- `GET /api/v1/assumptions`
-- `GET /api/v1/dataset/summary`
-- `GET /api/v1/feasibility`
-- `GET /api/v1/feasibility/{work_item_id}`
-- `GET /api/v1/portfolio`
-- `GET /api/v1/commercial`
-- `GET /api/v1/commercial/{work_item_id}`
-- `GET /api/v1/scoring`
-- `GET /api/v1/scoring/{action_id}`
-- `GET /api/v1/plan` / `POST /api/v1/plan`
-- `POST /api/v1/cash-flow`
-- `POST /api/v1/final-decision`
-- `GET /api/v1/baseline/summary`
-- `GET /api/v1/scenarios` / `POST /api/v1/scenarios`
-- `GET /api/v1/scenarios/{id}` / `PATCH /api/v1/scenarios/{id}` / `DELETE /api/v1/scenarios/{id}`
-- `POST /api/v1/scenarios/{id}/run` / `GET /api/v1/scenarios/{id}/runs`
-- `GET /api/v1/runs/{run_id}`
-- `GET /api/v1/runs/compare?run_a_id=...&run_b_id=...`
-
-## Test
-
-```bash
-cd backend
-pytest -q
-```
-
-354 tests, 0 failures (as of Phase 4).
-
-## Canonical Dataset Phase 2A Feasibility Results
+The data processing and decision-making pipeline is structured in a sequential, deterministic, and consistent workflow:
 
 ```
-Total work items : 24
-  FEASIBLE       : 21
-  BLOCKED        : 3   (W001, W006, W007 -- all waiting on W005)
-  INFEASIBLE     : 0
-
-Mandatory items  : 6
-  FEASIBLE       : 5
-  BLOCKED        : 1   (W001 -- mandatory delivery, blocked by W005)
-  INFEASIBLE     : 0
-
-Team capacity    : 748h
-Total workload   : 1277h (171% of capacity)
+[ Input Dataset ] (Work Items, Employees, Resources, Opportunities, Cash Flow)
+        │
+        ▼
+ 1. Feasibility Check (Feasibility)
+    └── Evaluates skills, languages, dependencies, capacity, and deadlines
+        │
+        ▼
+ 2. Portfolio Effects Evaluation (Portfolio Effects)
+    └── Calculates effort reductions, unlocked bids, and bonus cash inflows
+        │
+        ▼
+ 3. Commercial Evaluation (Commercial Evaluation)
+    └── Analyzes profit margins, win probabilities, and delivery hour reservations
+        │
+        ▼
+ 4. Priority Scoring (Scoring)
+    └── Normalizes empirical distributions, computes value scores from 0 to 100
+        │
+        ▼
+ 5. Operational Planning (Planner)
+    └── Day-by-day scheduling, prioritizes mandatory items, assigns staff, decides NO_BID
+        │
+        ▼
+ 6. Cash Flow Simulation (Cash Flow Simulator)
+    └── Generates daily JPY ledger across 3 scenarios, flags safety buffer breaches
+        │
+        ▼
+ 7. Validation & Explainability (Validation & Explanations)
+    └── Evaluates operational/financial status and assigns transparent reason codes
 ```
 
-> **Important:** BASE FEASIBILITY only. 21 feasible items cannot run simultaneously. The Planner (Phase 2E) selects a subset within capacity constraints.
+All business logic above is implemented in pure, decoupled Python, independent of UI frameworks or databases, guaranteeing determinism and high reliability.
 
-## Canonical Dataset Phase 2B Portfolio Effects (base scenario -- no triggers satisfied)
+---
+
+## 4. Key Features
+
+- **Executive Dashboard**: Quickly monitors critical Key Performance Indicators (KPIs), team capacity utilization, cash buffer health, and system connectivity.
+- **Data Ingestion & Planning Workflow**: Supports JSON schema validation, input dataset inspection, preliminary diagnostics, and end-to-end plan generation.
+- **Work Items Management**: Detailed lookup of work items, technical skill requirements, mandatory flags, dependency chains, and linked commercial options.
+- **Workforce Management (Employees)**: Displays personnel profiles, skill matrices, language proficiencies, hourly rates, absence schedules, and planned utilization.
+- **Scenario Studio (Scenarios)**: Create, customize, and store simulation scenarios with parameter overrides (initial cash, daily fixed cost, safety buffer, employee capacity, win probabilities), with run history tracking.
+- **Execution Plan Details (Plan)**: Comprehensive daily work allocation table, assigned personnel, deferred work items, and no-bid packages with explicit rationale.
+- **Cash Flow Analytics**: Daily cash projection charts across 3 scenarios, highlighting periods dropping below safety buffers and summarizing post-period revenue inflows.
+- **Scenario Comparison**: Side-by-side visual comparison between two scenario runs on workload output, revenue, resource utilization, and financial risks.
+- **Decision Explainability Tree (Explanations)**: Transparent breakdown of the factors and reasoning behind every decision, highlighting strategic strengths and core risks.
+- **Multilingual Support**: Seamlessly switch between **Vietnamese (Tiếng Việt)**, **English**, and **Japanese (日本語)**.
+
+---
+
+## 5. Project Structure
 
 ```
-E001  quality_prerequisite      W005 -> W001,W006,W007  ELEVATED RISK (qualitative)
-E002  hours_reduction           W013 -> W015            68.0h base (51.0h if W013 done)
-E003  future_hours_reduction    W017 -> W010,W019       p=0.75, 20% if W017 succeeds
-E004  commercial_option_unlock  W022 -> W007-B          LOCKED (COMMERCIAL_OPTION_LOCKED)
-E005  cash_inflow               W021 -> company_cash    p=0.85, +3.8M JPY if W021 done
+Nexaworks_Project/
+├── backend/                      # Server source code and decision engine
+│   ├── app/
+│   │   ├── decision_engine/      # Core algorithms (feasibility, portfolio, scoring, planner, cash flow, validation)
+│   │   ├── api/                  # FastAPI REST API endpoints
+│   │   ├── domain/               # Data models and constraint validations (Pydantic)
+│   │   ├── scenarios/            # Scenario management, parameter overrides, and SQLite storage
+│   │   ├── services/             # Data loaders, JSON Schema validators
+│   │   └── main.py               # FastAPI application entry point
+│   ├── tests/                    # Comprehensive automated test suite
+│   └── requirements.txt          # Python dependencies
+├── frontend/                     # Web user interface
+│   ├── src/
+│   │   ├── pages/                # Page components (Dashboard, Scenarios, Plan, Cash Flow, etc.)
+│   │   ├── components/           # Reusable UI components
+│   │   ├── api/                  # Backend API client and integration
+│   │   ├── workflow/             # Planning workflow state management
+│   │   ├── i18n.ts               # Multilingual configuration (VI, EN, JA)
+│   │   └── App.tsx               # Application shell and routing
+│   ├── package.json              # Frontend scripts and dependencies
+│   └── vite.config.ts            # Vite dev server and API proxy configuration
+├── data/                         # Benchmark datasets
+│   ├── candidate_dataset.json    # Standard 4-week benchmark dataset
+│   └── candidate_dataset.schema.json # JSON Schema for dataset validation
+└── docs/                         # Detailed business rules and specifications
 ```
 
-> **Important:** Portfolio effects evaluation only. Not a final business recommendation. Scoring and planning are deferred to Phase 2D-2E.
+---
 
-## Canonical Dataset Phase 2G Final Decision
+## 6. Getting Started
 
-```
-Overall status      : PLAN_AT_RISK
-Operational status  : OPERATIONALLY_PARTIAL
-Financial status    : NEGATIVE_CASH
+### Prerequisites
+- **Python**: Version 3.10 or higher
+- **Node.js**: Version 18 or higher (with `npm`)
 
-Selected            : 10 actions
-Delayed             : 9 actions
-NO-BID              : 6 opportunities
-Mandatory           : 6/6 scheduled (0 infeasible)
+---
 
-Capacity used       : 737/748 hrs (98.5%)
+### Starting the Backend
 
-EXPECTED ending cash: JPY -700,000   (buffer breach 2026-10-21, 12 days)
-DOWNSIDE ending cash: JPY -3,930,000 (buffer breach 2026-10-17, 16 days)
-SUCCESS ending cash : JPY -130,000   (buffer breach 2026-10-22, 11 days)
+1. Open a terminal and navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-Future receipts (outside horizon):
-  W001  2026-11-21  JPY 18,000,000
-  W002  2026-11-27  JPY  4,200,000
-  W012-A 2027-01-08 JPY  5,400,000
+2. Create and activate a Python virtual environment:
+   ```bash
+   # On Windows (PowerShell)
+   python -m venv .venv
+   .venv\Scripts\Activate.ps1
 
-Main risks    : NEGATIVE_CASH_EXPECTED, CASH_BUFFER_BREACH, CASH_TIMING_MISMATCH
-Main strengths: MANDATORY_WORK_SCHEDULED, PERSON_CAPACITY_VALID
-```
+   # On macOS / Linux
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
 
-> Structurally solvent (JPY 27.6M future receipts) but a timing gap causes
-> negative in-horizon cash across all scenarios. No code changes required —
-> this is the correct Phase 2G validated result.
+3. Install required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Launch the FastAPI server:
+   ```bash
+   uvicorn app.main:app --reload --port 8000
+   ```
+
+The backend will be running at `http://127.0.0.1:8000`. Interactive API documentation (Swagger UI) is available at `http://127.0.0.1:8000/docs`.
+
+---
+
+### Starting the Frontend
+
+1. Open a new terminal window and navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:5173`. The frontend automatically proxies API requests to the backend.
+
+---
+
+## 7. Testing & Notes
+
+### Running Automated Tests
+
+- **Backend Tests**:
+  ```bash
+  cd backend
+  pytest -q
+  ```
+  *(Currently **365 test cases passed**, comprehensively verifying feasibility checks, scoring logic, scheduling algorithms, exact JPY cash flow projections, and robustness against anomalous data)*.
+
+- **Frontend Tests**:
+  ```bash
+  cd frontend
+  npm test
+  ```
+  *(Currently **76 unit/integration tests passed** across 18 test suites covering UI components and workflow logic)*.
+
+---
+
+### Important Business Notes
+
+1. **Non-aggregative Skill Principle**: An employee's skill represents individual capability (two employees with Level 3 skill cannot substitute for a Level 4 requirement).
+2. **Handling Blocked Dependencies (`BLOCKED`)**: A work item whose prerequisites are not yet completed is marked as `BLOCKED` (temporarily locked) rather than `INFEASIBLE`, allowing the planner to schedule prerequisites first and execute the dependent task within the same horizon.
+3. **Commercial Capacity Preservation**: When a commercial option is selected, the committed delivery effort (`delivery_hours`) is fully reserved to guarantee real-world execution feasibility.
+4. **Cash Timing Mismatch (`CASH_TIMING_MISMATCH`) in the Benchmark Scenario**:
+   - In the benchmark scenario run, the system concludes with an overall status of **`PLAN_AT_RISK`**.
+   - **Operationally**: Outstanding results with **100% of mandatory items completed (6/6 items)** and **98.5% team capacity utilization** (737/748 hours).
+   - **Financially**: A temporary cash deficit occurs within the 4-week window due to daily operational fixed expenses, whereas substantial contract receivables (**27,600,000 JPY**) are disbursed only after the planning horizon concludes (in November 2026 and January 2027). The system faithfully highlights this real-world operational reality so management can arrange short-term bridge liquidity in a timely manner.
