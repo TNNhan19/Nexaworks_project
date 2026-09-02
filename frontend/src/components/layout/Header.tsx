@@ -7,7 +7,7 @@ interface HeaderProps { onMenuClick: () => void }
 export function Header({ onMenuClick }: HeaderProps) {
   const { t, i18n } = useTranslation()
   const location = useLocation()
-  const current = navigationItems.find((item) => location.pathname === item.path)?.key ?? 'dashboard'
+  const current = navigationItems.find((item) => location.pathname === item.path)?.key ?? 'overview'
   return (
     <header className="app-header">
       <button className="menu-button" onClick={onMenuClick} aria-label={t('header.openMenu')}><span /><span /><span /></button>

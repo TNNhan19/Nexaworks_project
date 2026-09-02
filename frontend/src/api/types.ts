@@ -37,6 +37,7 @@ export interface PersonOverride {
 export interface WorkItemOverride {
   work_item_id: string
   required_hours?: number
+  cash_in_days?: number
 }
 
 export interface CommercialOptionOverride {
@@ -50,6 +51,7 @@ export interface ScenarioOverrides {
   work_items: WorkItemOverride[]
   commercial_options: CommercialOptionOverride[]
   resources?: never[]
+  deferred_work_item_ids?: string[]
 }
 
 export interface ScenarioInput {
@@ -73,12 +75,15 @@ export interface PlanDecision {
   prerequisite_ids: string[]
   unlock_trigger_ids: string[]
   reason_codes: string[]
+  business_value_score?: number | null
+  details?: Record<string, unknown>
 }
 
 export interface Assignment {
   person_id: string
   action_id: string
   assigned_hours: number
+  assignment_role?: 'OWNER' | 'CONTRIBUTOR'
   skills_covered: string[]
   languages_covered: string[]
 }
@@ -151,6 +156,91 @@ export interface CommercialResult {
   opportunities: CommercialOpportunityResult[]
 }
 
+export interface CashEvent {
+  event_id: string
+  date: string
+  source_type: string
+  source_id: string
+  event_type: string
+  scenario: string
+  amount_jpy: number
+  direction: 'INFLOW' | 'OUTFLOW' | 'IN' | 'OUT'
+  deterministic: boolean
+  probability: number | null
+  timing_basis: string
+  outside_horizon: boolean
+  evidence: Record<string, unknown>
+}
+
+export interface DailyCashLedger {
+  date: string
+  opening_cash_jpy: number
+  cash_in_jpy: number
+  cash_out_jpy: number
+  net_change_jpy: number
+  closing_cash_jpy: number
+  minimum_buffer_jpy: number
+  buffer_headroom_jpy: number
+  buffer_breach: boolean
+  negative_cash: boolean
+  events: CashEvent[]
+}
+
+export interface CashScenarioResult {
+  scenario: string
+  status: string
+  timeline: DailyCashLedger[]
+  in_horizon_events: CashEvent[]
+  future_events: CashEvent[]
+  total_cash_in_jpy: number
+  total_cash_out_jpy: number
+  event_totals_jpy: Record<string, number>
+  minimum_cash_jpy: number
+  minimum_cash_date: string
+  ending_cash_jpy: number
+  first_buffer_breach_date: string | null
+  days_below_buffer: number
+  buffer_breach_dates: string[]
+  negative_cash_dates: string[]
+}
+
+export interface CashFlowResult {
+  overall_status: string
+  operational_plan_status: string
+  starting_cash_jpy: number
+  minimum_buffer_jpy: number
+  scenarios: Record<string, CashScenarioResult>
+  future_events: CashEvent[]
+  reasons: Array<{ code: string; source_id: string | null; scenario: string | null; details: Record<string, unknown> }>
+  warnings: Array<{ code: string; source_id: string | null; scenario: string | null; details: Record<string, unknown> }>
+  assumptions_used: Record<string, unknown>
+}
+
+export interface NumericDelta {
+  run_a: number | null
+  run_b: number | null
+  delta: number | null
+}
+
+export interface SetDelta {
+  added: string[]
+  removed: string[]
+}
+
+export interface RunComparison {
+  run_a_id: string
+  run_b_id: string
+  status_transition: Record<string, { from: string; to: string }>
+  selected: SetDelta
+  delayed: SetDelta
+  no_bid: SetDelta
+  capacity: Record<string, NumericDelta>
+  cash: Record<string, NumericDelta>
+  buffer_breach: { run_a: boolean; run_b: boolean; change: string }
+  major_risks: SetDelta
+  major_strengths: SetDelta
+}
+
 export interface ScenarioRun {
   run_id: string
   scenario_id: string
@@ -162,7 +252,7 @@ export interface ScenarioRun {
   commercial: CommercialResult
   scoring: Record<string, unknown>
   plan: PlanResult
-  cash_flow: Record<string, unknown>
+  cash_flow: CashFlowResult
   final_decision: FinalDecisionResult
   status: 'COMPLETED' | 'FAILED'
   error: { code?: string; message?: string } | null
@@ -219,6 +309,15 @@ export interface ExplanationRecord {
   source_id: string | null
   action_id: string | null
   evidence: Record<string, unknown>
+}
+
+export interface DecisionExplanation {
+  work_item_id: string
+  action_id: string
+  decision: string
+  reason_codes: string[]
+  findings: ExplanationRecord[]
+  details: Record<string, unknown>
 }
 
 export interface ExecutiveSummary {
@@ -327,7 +426,7 @@ export interface FinalDecisionResult {
   capacity_summary: CapacitySummary
   resource_summary?: ResourceSummary
   cash_summary: CashSummary
-  decision_explanations: unknown[]
+  decision_explanations: DecisionExplanation[]
   validations: ExplanationRecord[]
   warnings: ExplanationRecord[]
   critical_issues: ExplanationRecord[]

@@ -1,8 +1,11 @@
 export const navigationItems = [
-  { key: 'dashboard', path: '/dashboard', icon: 'grid' },
-  { key: 'scenarios', path: '/scenarios', icon: 'layers' },
-  { key: 'plan', path: '/plan', icon: 'calendar' },
+  { key: 'overview', path: '/dashboard', icon: 'grid' },
+  { key: 'planning', path: '/planning', icon: 'layers' },
+  { key: 'workItems', path: '/work-items', icon: 'insight' },
+  { key: 'employees', path: '/employees', icon: 'users' },
+  { key: 'executionPlan', path: '/plan', icon: 'calendar' },
   { key: 'cashFlow', path: '/cash-flow', icon: 'cash' },
+  { key: 'scenarios', path: '/scenarios', icon: 'layers' },
   { key: 'comparison', path: '/comparison', icon: 'compare' },
   { key: 'explanations', path: '/explanations', icon: 'insight' },
 ] as const

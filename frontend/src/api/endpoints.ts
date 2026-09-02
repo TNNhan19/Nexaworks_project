@@ -9,6 +9,7 @@ import type {
   Scenario,
   ScenarioInput,
   ScenarioRun,
+  RunComparison,
 } from './types'
 
 export const systemApi = {
@@ -37,6 +38,10 @@ export const scenarioApi = {
   run: (id: string) => apiRequest<ScenarioRun>(`/api/v1/scenarios/${encodeURIComponent(id)}/run`, { method: 'POST' }),
   runs: (id: string) => apiRequest<ScenarioRun[]>(`/api/v1/scenarios/${encodeURIComponent(id)}/runs`),
   getRun: (runId: string) => apiRequest<ScenarioRun>(`/api/v1/runs/${encodeURIComponent(runId)}`),
+  compareRuns: (runAId: string, runBId: string) => {
+    const query = new URLSearchParams({ run_a_id: runAId, run_b_id: runBId })
+    return apiRequest<RunComparison>(`/api/v1/runs/compare?${query.toString()}`)
+  },
 }
 
 export const baselineCatalogApi = {
@@ -51,4 +56,8 @@ export const baselineCatalogApi = {
       commercialOptions: [...new Set(commercial.opportunities.flatMap((item) => item.options.map((option) => option.option_id)))],
     }
   },
+}
+
+export const workforceApi = {
+  getPeople: () => apiRequest<import('../workflow/types').PlanningPerson[]>('/api/v1/workforce/people'),
 }
