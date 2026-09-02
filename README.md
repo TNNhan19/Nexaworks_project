@@ -20,7 +20,7 @@ Starter implementation for the four-week NexaWorks management decision challenge
   - `skill_checker.py` -- TEAM_COVERAGE (levels never summed)
   - `language_checker.py` -- CUSTOMER_FACING_COVERAGE (configurable via AssumptionRegistry)
   - `dependency_checker.py` -- HARD policy; unsatisfied deps -> BLOCKED (not INFEASIBLE)
-  - `capacity_checker.py` -- TOTAL_PERSON_HOURS; full team pool, orthogonal to skill coverage
+  - `capacity_checker.py` -- TOTAL_PERSON_HOURS; only people matching at least one required skill contribute capacity
   - `resource_checker.py` -- structural hours-vs-ceiling check, exclusive flag noted
   - `deadline_checker.py` -- EXPIRED/WITHIN_HORIZON/OUTSIDE_HORIZON; SOFT_WITH_PENALTY vs HARD_OR_EXPIRY
   - `engine.py` -- orchestrator; FEASIBLE / BLOCKED / INFEASIBLE status with hard_failures / blockers / warnings

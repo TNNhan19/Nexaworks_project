@@ -41,7 +41,7 @@ UNAVAILABLE_RANGE_BOUNDARY_POLICY = INCLUSIVE
 
 For each person, the inclusive planning dates minus inclusive unavailable dates are available days. Daily capacity is `capacity_hours / available_days`; unavailable dates have zero. Both daily and horizon totals are enforced. No eight-hour day is invented.
 
-`TEAM_COVERAGE` remains unchanged: different assigned people may cover different skills, levels are not summed, and every coverage witness receives positive work allocation. `CUSTOMER_FACING_COVERAGE` is read from `AssumptionRegistry`.
+Every assignee must meet at least one required skill at its minimum level. The team collectively covers all required skills, levels are not summed, and every coverage witness receives positive work allocation. One `OWNER` must meet an execution skill and all mandatory languages; selection maximizes required-skill coverage before deterministic capacity/ID tie-breaks. Mandatory commitments are attempted from highest qualified-capacity pressure first so flexible work does not consume scarce specialists.
 
 ## Day scheduling and deadlines
 

@@ -27,7 +27,7 @@ from typing import Any
 from app.domain.models import CandidateDataset
 
 from app.decision_engine.planner.models import PlanResult
-from app.decision_engine.planner.reason_codes import DecisionType, PlannerReasonCode
+from app.decision_engine.planner.reason_codes import AssignmentRole, DecisionType, PlannerReasonCode
 
 from .models import ExplanationRecord
 from .reason_codes import ExplanationCode, FindingSeverity, SourcePhase
@@ -65,7 +65,7 @@ def validate_mandatory_work(dataset: CandidateDataset, plan: PlanResult) -> list
     infeasible_ids = set(plan.mandatory_infeasible)
 
     for wid in mandatory_ids:
-        # Check across decisions — some mandatory items may appear as ENABLING_PREREQUISITE
+        # Check across decisions Ã¢â‚¬â€ some mandatory items may appear as ENABLING_PREREQUISITE
         decided = {dec.work_item_id for dec in plan.decisions}
         if wid in selected_ids or wid in infeasible_ids:
             continue
@@ -179,31 +179,81 @@ def validate_dependency_ordering(dataset: CandidateDataset, plan: PlanResult) ->
 # ---------------------------------------------------------------------------
 
 def validate_skill_coverage(dataset: CandidateDataset, plan: PlanResult) -> list[ExplanationRecord]:
-    """Verify that each selected work item's skill requirements are covered by
-    at least one assigned person at or above the required level."""
+    """Verify every contributor is qualified and the team covers every skill."""
     findings: list[ExplanationRecord] = []
     work_map = {item.id: item for item in dataset.work_items}
     person_map = {person.id: person for person in dataset.people}
-    option_to_work = {opt.option_id: opt.work_item_id for opt in dataset.commercial_options}
 
-    # Map action_id -> list of assigned person IDs
-    action_people: dict[str, list[str]] = defaultdict(list)
+    action_assignments: dict[str, list] = defaultdict(list)
     for assignment in plan.assignments:
-        action_people[assignment.action_id].append(assignment.person_id)
+        action_assignments[assignment.action_id].append(assignment)
 
     for dec in plan.decisions:
         if dec.decision not in {
             DecisionType.DO, DecisionType.ENABLING_PREREQUISITE, DecisionType.SELECT_OPTION
         }:
             continue
-        wid = dec.work_item_id
-        item = work_map.get(wid)
-        if item is None or not item.required_skills:
+        item = work_map.get(dec.work_item_id)
+        if item is None:
             continue
-        assigned_people = [
-            person_map[pid] for pid in action_people.get(dec.action_id, [])
-            if pid in person_map
+
+        assignments = action_assignments.get(dec.action_id, [])
+        owner_assignments = [
+            assignment for assignment in assignments
+            if assignment.assignment_role == AssignmentRole.OWNER
         ]
+        qualified_owners = [
+            assignment.person_id
+            for assignment in owner_assignments
+            if assignment.person_id in person_map
+            and (
+                not item.required_skills
+                or any(
+                    person_map[assignment.person_id].skills.get(req.skill, 0) >= req.min_level
+                    for req in item.required_skills
+                )
+            )
+        ]
+        if assignments and not qualified_owners:
+            findings.append(_rec(
+                ExplanationCode.SKILL_COVERAGE_VIOLATION,
+                FindingSeverity.ERROR,
+                source_phase=SourcePhase.FINAL_VALIDATION,
+                source_id=item.id,
+                action_id=dec.action_id,
+                violation_type="MISSING_QUALIFIED_OWNER",
+                owner_people=[assignment.person_id for assignment in owner_assignments],
+            ))
+
+        if not item.required_skills:
+            continue
+
+        assigned_people = [
+            person_map[assignment.person_id]
+            for assignment in assignments
+            if assignment.person_id in person_map
+        ]
+
+        for assignment in assignments:
+            person = person_map.get(assignment.person_id)
+            if person is None:
+                continue
+            matched_skills = [
+                req.skill for req in item.required_skills
+                if person.skills.get(req.skill, 0) >= req.min_level
+            ]
+            if not matched_skills:
+                findings.append(_rec(
+                    ExplanationCode.SKILL_COVERAGE_VIOLATION,
+                    FindingSeverity.ERROR,
+                    source_phase=SourcePhase.FINAL_VALIDATION,
+                    source_id=item.id,
+                    action_id=dec.action_id,
+                    violation_type="UNQUALIFIED_ASSIGNEE",
+                    person_id=person.id,
+                    required_skills=[req.skill for req in item.required_skills],
+                ))
+
         for req in item.required_skills:
             covered = any(
                 person.skills.get(req.skill, 0) >= req.min_level
@@ -218,70 +268,85 @@ def validate_skill_coverage(dataset: CandidateDataset, plan: PlanResult) -> list
                     ExplanationCode.SKILL_COVERAGE_VIOLATION,
                     FindingSeverity.ERROR,
                     source_phase=SourcePhase.FINAL_VALIDATION,
-                    source_id=wid,
+                    source_id=item.id,
                     action_id=dec.action_id,
+                    violation_type="TEAM_SKILL_GAP",
                     skill=req.skill,
                     required_level=req.min_level,
                     best_available_level=best,
-                    assigned_people=[p.id for p in assigned_people],
+                    assigned_people=[person.id for person in assigned_people],
                 ))
     return findings
-
 
 # ---------------------------------------------------------------------------
 # D. Language coverage
 # ---------------------------------------------------------------------------
 
 def validate_language_coverage(dataset: CandidateDataset, plan: PlanResult) -> list[ExplanationRecord]:
-    """Verify required language coverage per CUSTOMER_FACING_COVERAGE policy."""
+    """Verify that one execution-qualified owner covers all required languages."""
     findings: list[ExplanationRecord] = []
     from app.decision_engine.assumptions import DEFAULT_ASSUMPTIONS
     assumptions = DEFAULT_ASSUMPTIONS
     work_map = {item.id: item for item in dataset.work_items}
     person_map = {person.id: person for person in dataset.people}
 
-    action_people: dict[str, list[str]] = defaultdict(list)
+    action_assignments: dict[str, list] = defaultdict(list)
     for assignment in plan.assignments:
-        action_people[assignment.action_id].append(assignment.person_id)
+        action_assignments[assignment.action_id].append(assignment)
 
     for dec in plan.decisions:
         if dec.decision not in {
             DecisionType.DO, DecisionType.ENABLING_PREREQUISITE, DecisionType.SELECT_OPTION
         }:
             continue
-        wid = dec.work_item_id
-        item = work_map.get(wid)
+        item = work_map.get(dec.work_item_id)
         if item is None or not item.required_languages:
             continue
-        assigned_people = [
-            person_map[pid] for pid in action_people.get(dec.action_id, [])
-            if pid in person_map
-        ]
-        for lang in item.required_languages:
-            eligible = []
-            for person in assigned_people:
-                if lang not in person.languages:
-                    continue
-                if assumptions.language_customer_facing_skill is None:
-                    eligible.append(person.id)
-                else:
-                    level = person.skills.get(assumptions.language_customer_facing_skill, 0)
-                    if level >= assumptions.language_customer_facing_min_level:
-                        eligible.append(person.id)
-            if not eligible:
-                findings.append(_rec(
-                    ExplanationCode.LANGUAGE_COVERAGE_VIOLATION,
-                    FindingSeverity.ERROR,
-                    source_phase=SourcePhase.FINAL_VALIDATION,
-                    source_id=wid,
-                    action_id=dec.action_id,
-                    language=lang,
-                    assigned_people=[p.id for p in assigned_people],
-                    customer_facing_skill=assumptions.language_customer_facing_skill,
-                    customer_facing_min_level=assumptions.language_customer_facing_min_level,
-                ))
-    return findings
 
+        assignments = action_assignments.get(dec.action_id, [])
+        owner_assignments = [
+            assignment for assignment in assignments
+            if assignment.assignment_role == AssignmentRole.OWNER
+        ]
+        valid_owners: list[str] = []
+        for assignment in owner_assignments:
+            person = person_map.get(assignment.person_id)
+            if person is None:
+                continue
+            has_execution_skill = (
+                not item.required_skills
+                or any(
+                    person.skills.get(req.skill, 0) >= req.min_level
+                    for req in item.required_skills
+                )
+            )
+            has_languages = all(
+                language in person.languages for language in item.required_languages
+            )
+            proxy = assumptions.language_customer_facing_skill
+            has_customer_facing_skill = (
+                proxy is None
+                or not item.required_languages
+                or person.skills.get(proxy, 0) >= assumptions.language_customer_facing_min_level
+            )
+            if has_execution_skill and has_languages and has_customer_facing_skill:
+                valid_owners.append(person.id)
+
+        if not valid_owners:
+            findings.append(_rec(
+                ExplanationCode.LANGUAGE_COVERAGE_VIOLATION,
+                FindingSeverity.ERROR,
+                source_phase=SourcePhase.FINAL_VALIDATION,
+                source_id=item.id,
+                action_id=dec.action_id,
+                violation_type="MISSING_QUALIFIED_OWNER",
+                required_languages=item.required_languages,
+                owner_people=[assignment.person_id for assignment in owner_assignments],
+                assigned_people=[assignment.person_id for assignment in assignments],
+                customer_facing_skill=assumptions.language_customer_facing_skill,
+                customer_facing_min_level=assumptions.language_customer_facing_min_level,
+            ))
+    return findings
 
 # ---------------------------------------------------------------------------
 # E. Person horizon capacity

@@ -25,7 +25,7 @@ from .models import (
     ResourceCapacityUsage,
 )
 from .prerequisites import PrerequisiteResolver
-from .reason_codes import AllocationType, DecisionType, PlannerReasonCode, PlanStatus
+from .reason_codes import AllocationType, AssignmentRole, DecisionType, PlannerReasonCode, PlanStatus
 from .scheduler import DayScheduler
 
 
@@ -39,14 +39,33 @@ class PlannerEngine:
         self.feasibility_engine = FeasibilityEngine(assumptions)
         self.scoring_engine = ScoringEngine(assumptions)
 
+    def _mandatory_capacity_pressure(self, item: WorkItem) -> float:
+        """Return required hours per structurally eligible capacity hour."""
+        if not item.required_skills:
+            eligible_capacity = sum(person.capacity_hours for person in self.dataset.people)
+        else:
+            eligible_capacity = sum(
+                person.capacity_hours
+                for person in self.dataset.people
+                if any(
+                    person.skills.get(requirement.skill, 0) >= requirement.min_level
+                    for requirement in item.required_skills
+                )
+            )
+        if eligible_capacity <= 0:
+            return float("inf")
+        return item.required_hours / eligible_capacity
+
     def plan(
         self,
         dataset: CandidateDataset,
         *,
         completed_work_item_ids: frozenset[str] | None = None,
         scoring_reference: ScoringReference | None = None,
+        deferred_work_item_ids: frozenset[str] | None = None,
     ) -> PlanResult:
         self.dataset = dataset
+        self.deferred_work_item_ids = frozenset(deferred_work_item_ids or frozenset())
         self.initial_completed = frozenset(completed_work_item_ids or frozenset())
         self.work = {item.id: item for item in dataset.work_items}
         self.options = {item.option_id: item for item in dataset.commercial_options}
@@ -62,7 +81,7 @@ class PlannerEngine:
         self.closures = []
         self.warnings: list[PlannerWarning] = []
         self.unresolved: list[PlannerWarning] = []
-        self.coverage: dict[str, dict[str, dict[str, list[str]]]] = {}
+        self.coverage: dict[str, dict[str, Any]] = {}
         self.failures: dict[str, PlannerReasonCode] = {}
 
         baseline_portfolio = self._portfolio(self.initial_completed)
@@ -81,10 +100,16 @@ class PlannerEngine:
             for candidate in self.scoring.candidates
         }
 
-        # REQUIRED_TARGET: due date then stable ID, while closure enforces topology.
+        # Schedule the most capacity-constrained mandatory commitments first so
+        # flexible work cannot consume specialists needed by harder work.
+        # Dependency closure still enforces prerequisite order.
         mandatory = sorted(
             (item for item in dataset.work_items if item.mandatory),
-            key=lambda item: (item.due_date, item.id),
+            key=lambda item: (
+                -self._mandatory_capacity_pressure(item),
+                item.due_date,
+                item.id,
+            ),
         )
         mandatory_infeasible: list[str] = []
         for item in mandatory:
@@ -163,6 +188,7 @@ class PlannerEngine:
                 "commercial_delivery_timing_policy": self.assumptions.commercial_delivery_timing_policy,
                 "planning_granularity": self.assumptions.planning_granularity,
                 "sales_capacity_policy": self.assumptions.sales_capacity_policy,
+                "deferred_work_item_ids": sorted(self.deferred_work_item_ids),
             },
             score_version=self.scoring.score_version,
         )
@@ -209,6 +235,9 @@ class PlannerEngine:
         work_item = self.work.get(option.work_item_id if option else action_id)
         if work_item is None:
             self.failures[action_id] = PlannerReasonCode.INVALID_REFERENCE
+            return False
+        if work_item.id in self.deferred_work_item_ids:
+            self.failures[action_id] = PlannerReasonCode.USER_DEFERRED
             return False
         if work_item.id in self.selected_work_ids:
             return True
@@ -373,6 +402,7 @@ class PlannerEngine:
         self.coverage[action_id] = {
             "skills": attempt.witness_skills,
             "languages": attempt.witness_languages,
+            "owner_id": attempt.owner_id,
         }
         reason_codes = []
         if mandatory:
@@ -474,14 +504,34 @@ class PlannerEngine:
         for entry in self.scheduler.state.schedule:
             key = (entry.person_id, entry.action_id)
             totals[key] = totals.get(key, 0.0) + entry.hours
+
+        action_to_work = {
+            decision.action_id: decision.work_item_id for decision in self.decisions
+        }
+        person_map = {person.id: person for person in self.dataset.people}
         result: list[Assignment] = []
-        for (person_id, action_id), hours in sorted(totals.items(), key=lambda item: (item[0][1], item[0][0])):
+        for (person_id, action_id), hours in sorted(
+            totals.items(), key=lambda item: (item[0][1], item[0][0])
+        ):
             evidence = self.coverage.get(action_id, {})
+            person = person_map[person_id]
+            work_item = self.work.get(action_to_work.get(action_id, action_id))
+            skills_covered = []
+            if work_item is not None:
+                skills_covered = [
+                    req.skill for req in work_item.required_skills
+                    if person.skills.get(req.skill, 0) >= req.min_level
+                ]
             result.append(Assignment(
                 person_id=person_id,
                 action_id=action_id,
                 assigned_hours=round(hours, 6),
-                skills_covered=evidence.get("skills", {}).get(person_id, []),
+                assignment_role=(
+                    AssignmentRole.OWNER
+                    if evidence.get("owner_id") == person_id
+                    else AssignmentRole.CONTRIBUTOR
+                ),
+                skills_covered=skills_covered,
                 languages_covered=evidence.get("languages", {}).get(person_id, []),
             ))
         return result

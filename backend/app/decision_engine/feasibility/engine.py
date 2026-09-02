@@ -7,7 +7,7 @@ Pipeline per work item:
     1. Skill coverage check     (TEAM_COVERAGE policy)
     2. Language coverage check  (CUSTOMER_FACING_COVERAGE policy)
     3. Dependency check         (HARD policy)
-    4. Capacity check           (TOTAL_PERSON_HOURS policy — full team pool)
+    4. Capacity check           (skill-eligible contributor pool)
     5. Resource check           (structural hours vs ceiling)
     6. Deadline check           (SOFT_WITH_PENALTY or HARD_OR_EXPIRY)
     7. Status determination     (INFEASIBLE / BLOCKED / FEASIBLE)
@@ -172,6 +172,7 @@ class FeasibilityEngine:
             required_languages=work_item.required_languages,
             people=dataset.people,
             assumptions=self._assumptions,
+            required_skills=work_item.required_skills,
         )
 
         # --- 3. Dependency check -------------------------------------------------
@@ -182,7 +183,7 @@ class FeasibilityEngine:
         )
 
         # --- 4. Capacity check ---------------------------------------------------
-        # Full team pool — skill/language coverage is orthogonal to hour capacity.
+        # Only people satisfying at least one required skill contribute capacity.
         # If effective_hours_override is provided (from Portfolio Effects Engine),
         # use the effective hours instead of the canonical required_hours.
         # The feasibility engine does not need to know why hours changed.
@@ -195,6 +196,7 @@ class FeasibilityEngine:
             work_item_id=work_item.id,
             required_hours=hours_for_capacity,
             people=dataset.people,
+            required_skills=work_item.required_skills,
         )
 
         # --- 5. Resource check ---------------------------------------------------

@@ -78,19 +78,17 @@ class DependencyResult(BaseModel):
 
 
 class CapacityResult(BaseModel):
-    """Person-hour capacity check result (TOTAL_PERSON_HOURS policy).
+    """Person-hour capacity check result (skill-eligible contributor policy).
 
-    The capacity pool is the entire team — not restricted to skill/language
-    eligible people.  Skill coverage and capacity are orthogonal concerns:
-    a person contributes labour hours even if someone else covers the
-    required skill threshold.
+    The capacity pool contains people satisfying at least one required skill.
+    Work without skill requirements may use the full team.
     """
 
     required_hours: float
     """Total person-hours the work item needs (shared across all assignees)."""
 
     total_team_capacity_hours: float
-    """Sum of capacity_hours across all people in the dataset."""
+    """Sum of capacity_hours across people eligible to contribute to the work."""
 
     sufficient: bool
     """True if total_team_capacity_hours >= required_hours."""

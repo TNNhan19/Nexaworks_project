@@ -36,7 +36,7 @@ from conftest import (
 
 
 # -----------------------------------------------------------------------
-# Test 4 — Language successfully covered (default policy: any speaker)
+# Test 4 Ã¢â‚¬â€ Language successfully covered (default policy: any speaker)
 # -----------------------------------------------------------------------
 
 def test_language_covered_any_speaker(default_assumptions):
@@ -58,9 +58,9 @@ def test_language_covered_any_speaker(default_assumptions):
 
 def test_language_covered_with_coordinating_policy(coordinating_assumptions):
     """With customer-facing policy (pm>=3): only high-pm speaker qualifies."""
-    # PA speaks "ja" but pm=1 → doesn't qualify under coordinating policy
+    # PA speaks "ja" but pm=1 Ã¢â€ â€™ doesn't qualify under coordinating policy
     low_pm = make_person("PA", capacity=100, skills={"project_management": 1}, languages=["ja"])
-    # PB speaks "ja" and pm=4 → qualifies
+    # PB speaks "ja" and pm=4 Ã¢â€ â€™ qualifies
     high_pm = make_person("PB", capacity=100, skills={"project_management": 4}, languages=["ja"])
     work = make_work_item("WX", required_hours=50, required_languages=["ja"])
     dataset = make_dataset([low_pm, high_pm], [work])
@@ -75,11 +75,11 @@ def test_language_covered_with_coordinating_policy(coordinating_assumptions):
 
 
 # -----------------------------------------------------------------------
-# Test 5 — Missing language coverage
+# Test 5 Ã¢â‚¬â€ Missing language coverage
 # -----------------------------------------------------------------------
 
 def test_language_not_covered(default_assumptions):
-    """No person speaks the required language → INFEASIBLE."""
+    """No person speaks the required language Ã¢â€ â€™ INFEASIBLE."""
     person = make_person("PX", capacity=100, skills={}, languages=["en"])
     work = make_work_item("WX", required_hours=50, required_languages=["ja"])
     dataset = make_dataset([person], [work])
@@ -96,7 +96,7 @@ def test_language_not_covered(default_assumptions):
 
 
 def test_language_not_covered_with_coordinating_policy(coordinating_assumptions):
-    """Speaker exists but doesn't meet coordinating skill threshold → not covered."""
+    """Speaker exists but doesn't meet coordinating skill threshold Ã¢â€ â€™ not covered."""
     low_pm = make_person("PX", capacity=100, skills={"project_management": 1}, languages=["ja"])
     work = make_work_item("WX", required_hours=50, required_languages=["ja"])
     dataset = make_dataset([low_pm], [work])
@@ -122,11 +122,11 @@ def test_work_item_with_no_required_languages(default_assumptions):
 
 
 # -----------------------------------------------------------------------
-# Test 7 — Enough aggregate capacity
+# Test 7 Ã¢â‚¬â€ Enough aggregate capacity
 # -----------------------------------------------------------------------
 
 def test_sufficient_capacity(default_assumptions):
-    """Total team capacity >= required_hours → sufficient."""
+    """Total team capacity >= required_hours Ã¢â€ â€™ sufficient."""
     p1 = make_person("PA", capacity=100, skills={})
     p2 = make_person("PB", capacity=100, skills={})
     work = make_work_item("WX", required_hours=150)
@@ -141,32 +141,33 @@ def test_sufficient_capacity(default_assumptions):
     assert cap_failures == []
 
 
-def test_capacity_uses_full_team_not_just_skill_eligible(default_assumptions):
-    """A person without the required skill still contributes to capacity pool."""
-    # PA has the required skill, PB does not — but both count for capacity
+def test_capacity_uses_only_skill_eligible_people(default_assumptions):
+    """People without any required skill cannot contribute capacity."""
     pa = make_person("PA", capacity=50, skills={"robotics": 5})
-    pb = make_person("PB", capacity=80, skills={})  # no skill, but hours count
+    pb = make_person("PB", capacity=80, skills={})
     work = make_work_item(
         "WX",
         required_hours=100,
         required_skills=[SkillRequirement(skill="robotics", min_level=4)],
     )
     dataset = make_dataset([pa, pb], [work])
-    engine = FeasibilityEngine(default_assumptions)
-    result = engine.check_work_item(work, dataset)
+    result = FeasibilityEngine(default_assumptions).check_work_item(work, dataset)
 
-    # Skill is covered by PA; capacity is 50+80=130 >= 100
-    assert result.capacity.total_team_capacity_hours == 130.0
-    assert result.capacity.sufficient is True
-    assert result.status == FeasibilityStatus.FEASIBLE
-
+    assert result.capacity.total_team_capacity_hours == 50.0
+    assert result.capacity.sufficient is False
+    assert result.status == FeasibilityStatus.INFEASIBLE
+    failure = next(
+        item for item in result.hard_failures
+        if item.code == ReasonCode.INSUFFICIENT_PERSON_CAPACITY
+    )
+    assert failure.details["eligible_person_ids"] == ["PA"]
 
 # -----------------------------------------------------------------------
-# Test 8 — Insufficient aggregate capacity → INFEASIBLE
+# Test 8 Ã¢â‚¬â€ Insufficient aggregate capacity Ã¢â€ â€™ INFEASIBLE
 # -----------------------------------------------------------------------
 
 def test_insufficient_capacity(default_assumptions):
-    """Total team capacity < required_hours → INFEASIBLE (hard failure)."""
+    """Total team capacity < required_hours Ã¢â€ â€™ INFEASIBLE (hard failure)."""
     p1 = make_person("PA", capacity=30, skills={})
     p2 = make_person("PB", capacity=30, skills={})
     work = make_work_item("WX", required_hours=100)
@@ -185,11 +186,11 @@ def test_insufficient_capacity(default_assumptions):
 
 
 # -----------------------------------------------------------------------
-# Test 9 — Dependency satisfied
+# Test 9 Ã¢â‚¬â€ Dependency satisfied
 # -----------------------------------------------------------------------
 
 def test_dependency_satisfied(default_assumptions):
-    """Work item with dependency in completed_ids → not blocked."""
+    """Work item with dependency in completed_ids Ã¢â€ â€™ not blocked."""
     person = make_person("PX", capacity=100, skills={})
     prereq = make_work_item("PREREQ", required_hours=20)
     work = make_work_item("WX", required_hours=50, dependencies=["PREREQ"])
@@ -206,11 +207,11 @@ def test_dependency_satisfied(default_assumptions):
 
 
 # -----------------------------------------------------------------------
-# Test 10 — Dependency missing/incomplete → BLOCKED (not INFEASIBLE)
+# Test 10 Ã¢â‚¬â€ Dependency missing/incomplete Ã¢â€ â€™ BLOCKED (not INFEASIBLE)
 # -----------------------------------------------------------------------
 
 def test_dependency_not_satisfied_gives_blocked_not_infeasible(default_assumptions):
-    """Unsatisfied HARD dependency → BLOCKED status, not INFEASIBLE.
+    """Unsatisfied HARD dependency Ã¢â€ â€™ BLOCKED status, not INFEASIBLE.
 
     The Planner may schedule the prerequisite first; this is not a permanent
     structural impossibility.
@@ -220,7 +221,7 @@ def test_dependency_not_satisfied_gives_blocked_not_infeasible(default_assumptio
     work = make_work_item("WX", required_hours=50, dependencies=["PREREQ"])
     dataset = make_dataset([person], [prereq, work])
     engine = FeasibilityEngine(default_assumptions)
-    # completed_ids is empty — PREREQ not done yet
+    # completed_ids is empty Ã¢â‚¬â€ PREREQ not done yet
     result = engine.check_work_item(work, dataset, completed_ids=frozenset())
 
     assert result.dependencies.satisfied is False
@@ -234,7 +235,7 @@ def test_dependency_not_satisfied_gives_blocked_not_infeasible(default_assumptio
 
 
 def test_multiple_dependencies_partially_satisfied(default_assumptions):
-    """Only one of two deps is complete — still BLOCKED with correct missing list."""
+    """Only one of two deps is complete Ã¢â‚¬â€ still BLOCKED with correct missing list."""
     person = make_person("PX", capacity=200, skills={})
     dep1 = make_work_item("DEP1", required_hours=10)
     dep2 = make_work_item("DEP2", required_hours=10)
@@ -250,7 +251,7 @@ def test_multiple_dependencies_partially_satisfied(default_assumptions):
 
 
 # -----------------------------------------------------------------------
-# Test 11 — Mandatory item that is infeasible stays INFEASIBLE with warning
+# Test 11 Ã¢â‚¬â€ Mandatory item that is infeasible stays INFEASIBLE with warning
 # -----------------------------------------------------------------------
 
 def test_mandatory_infeasible_item_stays_infeasible(default_assumptions):
@@ -279,7 +280,7 @@ def test_mandatory_infeasible_item_stays_infeasible(default_assumptions):
 
 
 def test_mandatory_blocked_item_stays_blocked_with_warning(default_assumptions):
-    """mandatory=True + unsatisfied dep → BLOCKED with MANDATORY_ITEM_BLOCKED warning."""
+    """mandatory=True + unsatisfied dep Ã¢â€ â€™ BLOCKED with MANDATORY_ITEM_BLOCKED warning."""
     person = make_person("PX", capacity=200, skills={})
     prereq = make_work_item("PREREQ", required_hours=10)
     work = make_work_item("WX", required_hours=50, mandatory=True, dependencies=["PREREQ"])
@@ -293,11 +294,11 @@ def test_mandatory_blocked_item_stays_blocked_with_warning(default_assumptions):
 
 
 # -----------------------------------------------------------------------
-# Test 12 — Sales opportunity deadline / expiry handling
+# Test 12 Ã¢â‚¬â€ Sales opportunity deadline / expiry handling
 # -----------------------------------------------------------------------
 
 def test_sales_opportunity_expired_is_infeasible(default_assumptions):
-    """sales_opportunity with due_date before planning_date → OPPORTUNITY_EXPIRED (hard)."""
+    """sales_opportunity with due_date before planning_date Ã¢â€ â€™ OPPORTUNITY_EXPIRED (hard)."""
     person = make_person("PX", capacity=100, skills={})
     expired_date = date(2026, 9, 30)  # before PLAN_START 2026-10-05
     work = make_work_item(
@@ -319,7 +320,7 @@ def test_sales_opportunity_expired_is_infeasible(default_assumptions):
 
 
 def test_delivery_expired_deadline_is_warning_not_infeasible(default_assumptions):
-    """delivery work item with expired due_date → WARNING (soft), not INFEASIBLE."""
+    """delivery work item with expired due_date Ã¢â€ â€™ WARNING (soft), not INFEASIBLE."""
     person = make_person("PX", capacity=100, skills={})
     expired_date = date(2026, 9, 30)  # before PLAN_START
     work = make_work_item(
@@ -335,7 +336,7 @@ def test_delivery_expired_deadline_is_warning_not_infeasible(default_assumptions
 
     assert result.deadline.status == DeadlineStatus.EXPIRED
     assert result.deadline.policy == DeadlinePolicy.SOFT_WITH_PENALTY
-    # Expiry is WARNING for soft policy — should NOT be INFEASIBLE by deadline alone
+    # Expiry is WARNING for soft policy Ã¢â‚¬â€ should NOT be INFEASIBLE by deadline alone
     assert result.status == FeasibilityStatus.FEASIBLE  # only deadline expired; no other failures
     deadline_warn_codes = [w.code for w in result.warnings]
     assert ReasonCode.DEADLINE_AT_RISK in deadline_warn_codes
@@ -344,7 +345,7 @@ def test_delivery_expired_deadline_is_warning_not_infeasible(default_assumptions
 
 
 def test_deadline_within_horizon(default_assumptions):
-    """Due date within planning window → WITHIN_HORIZON, no deadline finding."""
+    """Due date within planning window Ã¢â€ â€™ WITHIN_HORIZON, no deadline finding."""
     person = make_person("PX", capacity=100, skills={})
     within_date = date(2026, 10, 20)
     work = make_work_item("WX", required_hours=50, due_date=within_date)
@@ -362,7 +363,7 @@ def test_deadline_within_horizon(default_assumptions):
 
 
 def test_deadline_outside_horizon(default_assumptions):
-    """Due date after planning_end → OUTSIDE_HORIZON, no findings."""
+    """Due date after planning_end Ã¢â€ â€™ OUTSIDE_HORIZON, no findings."""
     person = make_person("PX", capacity=100, skills={})
     future_date = date(2027, 3, 1)
     work = make_work_item("WX", required_hours=50, due_date=future_date)
@@ -374,7 +375,7 @@ def test_deadline_outside_horizon(default_assumptions):
 
 
 # -----------------------------------------------------------------------
-# Test 13 — Mutually exclusive commercial option validation (structural)
+# Test 13 Ã¢â‚¬â€ Mutually exclusive commercial option validation (structural)
 # -----------------------------------------------------------------------
 
 def test_work_item_with_no_commercial_options_is_not_affected(default_assumptions):

@@ -162,15 +162,21 @@ def test_resource_results_for_w001(canonical_dataset, result_map):
 # Capacity: total team = 748h; no single work item should exceed this
 # ---------------------------------------------------------------------------
 
-def test_capacity_total_matches_baseline(canonical_results, canonical_dataset):
-    """Every result should reference the same total team capacity = 748h."""
-    total = sum(p.capacity_hours for p in canonical_dataset.people)
-    assert total == 748.0
-    for r in canonical_results:
-        assert r.capacity.total_team_capacity_hours == 748.0, (
-            f"{r.work_item_id}: capacity total mismatch"
+def test_capacity_total_matches_skill_eligible_pool(canonical_results, canonical_dataset):
+    """Each result uses only people who can execute at least one required skill."""
+    work_map = {item.id: item for item in canonical_dataset.work_items}
+    for result in canonical_results:
+        item = work_map[result.work_item_id]
+        eligible_capacity = sum(
+            person.capacity_hours
+            for person in canonical_dataset.people
+            if not item.required_skills
+            or any(
+                person.skills.get(requirement.skill, 0) >= requirement.min_level
+                for requirement in item.required_skills
+            )
         )
-
+        assert result.capacity.total_team_capacity_hours == eligible_capacity
 
 # ---------------------------------------------------------------------------
 # Deadline classification: sales_opportunity items
