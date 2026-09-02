@@ -6,9 +6,9 @@ A comprehensive enterprise decision support and operational planning system, com
 
 ## 1. Problem Overview
 
-The system addresses the challenge of operational management and resource optimization for an enterprise within a 4-week planning horizon (from **October 5, 2026** to **October 30, 2026**), under strict resource and financial constraints:
+The system addresses the challenge of operational management and resource optimization for an enterprise within a 4-week planning horizon (from **October 5, 2026** to **November 1, 2026**), under strict resource and financial constraints:
 
-- **Work Demand Exceeding Capacity**: Total workload demand is 1,277 hours, while the total capacity of the 6-person team is only 748 hours (actual demand reaches 171% of available capacity).
+- **Work Demand Exceeding Capacity**: Total workload demand is 1,277 hours, while the total capacity of the 7-person team is only 748 hours (actual demand reaches 171% of available capacity).
 - **Strict Skill and Language Constraints**: Each work item requires specific technical skill sets at minimum proficiency levels and client communication language standards (Japanese, English). Skill levels represent individual competency and cannot be mechanically aggregated across multiple team members.
 - **Dependencies and Shared Resources**: Multiple work items require prerequisite tasks to be completed first. Additionally, certain exclusive equipment/resources can only be utilized by at most one work item per day.
 - **Trade-offs Between Mandatory Commitments and Commercial Opportunities**: The system must balance fulfilling mandatory contract/safety commitments against pursuing commercial bids with win probabilities and potential revenue.
